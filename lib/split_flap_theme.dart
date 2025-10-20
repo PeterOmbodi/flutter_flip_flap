@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 @immutable
 class FlipFlapTheme extends ThemeExtension<FlipFlapTheme> {
-  const FlipFlapTheme({required this.unitDecoration, required this.panelDecoration, required this.textStyle});
+  const FlipFlapTheme({required this.unitDecoration, required this.displayDecoration, required this.textStyle});
 
   final BoxDecoration unitDecoration;
-  final BoxDecoration panelDecoration;
+  final BoxDecoration displayDecoration;
   final TextStyle textStyle;
 
   @override
@@ -14,9 +14,9 @@ class FlipFlapTheme extends ThemeExtension<FlipFlapTheme> {
     final BoxDecoration? panelDecoration,
     final TextStyle? symbolStyle,
   }) => FlipFlapTheme(
-    unitDecoration: tileDecoration ?? this.unitDecoration,
-    panelDecoration: panelDecoration ?? this.panelDecoration,
-    textStyle: symbolStyle ?? this.textStyle,
+    unitDecoration: tileDecoration ?? unitDecoration,
+    displayDecoration: panelDecoration ?? displayDecoration,
+    textStyle: symbolStyle ?? textStyle,
   );
 
   @override
@@ -25,7 +25,7 @@ class FlipFlapTheme extends ThemeExtension<FlipFlapTheme> {
 
     return FlipFlapTheme(
       unitDecoration: BoxDecoration.lerp(unitDecoration, other.unitDecoration, t) ?? unitDecoration,
-      panelDecoration: BoxDecoration.lerp(panelDecoration, other.panelDecoration, t) ?? panelDecoration,
+      displayDecoration: BoxDecoration.lerp(displayDecoration, other.displayDecoration, t) ?? displayDecoration,
       textStyle: TextStyle.lerp(textStyle, other.textStyle, t) ?? textStyle,
     );
   }
@@ -43,7 +43,7 @@ class FlipFlapTheme extends ThemeExtension<FlipFlapTheme> {
       border: Border.fromBorderSide(BorderSide(color: Color(0xFF424242), width: 0.5)),
       borderRadius: BorderRadius.all(Radius.circular(4)),
     ),
-    panelDecoration: const BoxDecoration(color: Colors.transparent),
+    displayDecoration: const BoxDecoration(color: Colors.transparent),
     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.black87),
   );
 
@@ -53,7 +53,7 @@ class FlipFlapTheme extends ThemeExtension<FlipFlapTheme> {
       border: Border.fromBorderSide(BorderSide(color: Color(0xFFFFFFFF), width: 0.5)),
       borderRadius: BorderRadius.all(Radius.circular(4)),
     ),
-    panelDecoration: const BoxDecoration(color: Colors.transparent),
+    displayDecoration: const BoxDecoration(color: Colors.transparent),
     textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: Colors.white70),
   );
 }

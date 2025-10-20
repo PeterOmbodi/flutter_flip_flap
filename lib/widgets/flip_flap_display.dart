@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_flip_flap/split_flap_theme.dart';
-import 'package:flutter_flip_flap/widgets/flap_display.dart';
+import 'package:flutter_flip_flap/widgets/flap_unit.dart';
 
 class FlipFlapDisplay extends StatelessWidget {
   FlipFlapDisplay({
     super.key,
     required this.text,
+    required this.unitConstraints,
     this.cardsInPack,
     this.textStyle,
     this.displayDecoration,
-    this.unitDecoration,
-    required this.unitConstraints,
     this.displayType = UnitType.number,
+    this.unitDecoration,
   }) : splitText = displayType == UnitType.text
            ? [text]
            : text.characters.toList();
@@ -30,7 +30,7 @@ class FlipFlapDisplay extends StatelessWidget {
     final theme = FlipFlapTheme.of(context);
 
     return DecoratedBox(
-      decoration: displayDecoration ?? theme.panelDecoration,
+      decoration: displayDecoration ?? theme.displayDecoration,
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
