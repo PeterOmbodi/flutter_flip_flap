@@ -34,19 +34,19 @@ class FlipFlapDisplay extends StatelessWidget {
       child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: splitText
-              .map(
-                (final e) => FlapUnit(
-                  text: e,
-                  cardsInPack: cardsInPack ?? 1,
-                  unitConstraints: unitConstraints,
-                  textStyle: textStyle ?? theme.textStyle,
-                  unitDecoration: unitDecoration ?? theme.unitDecoration,
-                  displayType: displayType,
-                  useShortestWay: false,
-                ),
-              )
-              .toList(),
+          children: [
+            for (int i = 0; i < splitText.length; i++)
+              FlapUnit(
+                key: ValueKey('FlapUnit-$i'),
+                text: splitText[i],
+                cardsInPack: cardsInPack ?? 2,
+                unitConstraints: unitConstraints,
+                textStyle: textStyle ?? theme.textStyle,
+                unitDecoration: unitDecoration ?? theme.unitDecoration,
+                displayType: displayType,
+                useShortestWay: false,
+              ),
+          ],
         ),
       ),
     );
