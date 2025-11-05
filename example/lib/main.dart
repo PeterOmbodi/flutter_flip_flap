@@ -54,9 +54,23 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
   }
 
   @override
-  Widget build(final BuildContext context) => FlipFlapDisplay(
-    text: _time,
-    unitConstraints: const BoxConstraints(minWidth: 24, minHeight: 40),
-    displayType: UnitType.mixed,
-  );
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final horizontalPadding = 32.0;
+    final available = (screenWidth - horizontalPadding).clamp(200.0, double.infinity);
+    final units = _time.length;
+    final unitWidth = (available / units).clamp(24.0, 96.0);
+    final unitHeight = unitWidth * 1.7;
+    final fontSize = unitHeight * 0.75;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding / 2),
+      child: FlipFlapDisplay(
+        text: _time,
+        textStyle: FlipFlapTheme.of(context).textStyle.copyWith(fontSize: fontSize),
+        unitConstraints: BoxConstraints(minWidth: unitWidth, minHeight: unitHeight),
+        displayType: UnitType.mixed,
+      ),
+    );
+  }
 }
