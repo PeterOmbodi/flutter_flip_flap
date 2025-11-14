@@ -9,3 +9,8 @@
 ## 0.1.2
 - add example app
 - fix animation
+
+## 0.2.0
+- add flapped child widget
+- improve flapped text unit
+- use flapped widget in example

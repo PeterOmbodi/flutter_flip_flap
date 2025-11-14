@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_flip_flap/flutter_flip_flap.dart';
+import 'package:intl/intl.dart';
 
 void main() => runApp(const MyApp());
 
@@ -62,15 +64,89 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
     final unitWidth = (available / units).clamp(24.0, 96.0);
     final unitHeight = unitWidth * 1.7;
     final fontSize = unitHeight * 0.75;
+    final unitConstraints = BoxConstraints(minWidth: unitWidth, minHeight: unitHeight, maxHeight: unitHeight);
+    final widgetConstraints = unitConstraints.copyWith(minWidth: unitConstraints.minWidth * 2);
+    final textStyle = FlipFlapTheme.of(context).textStyle.copyWith(fontSize: fontSize);
+
+    final splitTime = _time.split(':');
+    final hoursText = splitTime.first;
+    final minutesText = splitTime[1];
+    final secondsText = splitTime.last;
+    final now = DateTime.now();
+    final dayName = DateFormat.EEEE().format(now);
+    final monthName = DateFormat.MMMM().format(now);
+    final isOdd = int.parse(secondsText) % 2 == 1;
+    final randomEm = getRandomEmoji();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding / 2),
-      child: FlipFlapDisplay(
-        text: _time,
-        textStyle: FlipFlapTheme.of(context).textStyle.copyWith(fontSize: fontSize),
-        unitConstraints: BoxConstraints(minWidth: unitWidth, minHeight: unitHeight),
-        displayType: UnitType.mixed,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 8,
+        children: [
+          FlipFlapDisplay.fromText(text: _time, textStyle: textStyle, unitConstraints: unitConstraints),
+          FlipFlapDisplay.fromText(
+            text: _time,
+            textStyle: textStyle,
+            unitConstraints: unitConstraints,
+            unitType: UnitType.text,
+          ),
+          FlipFlapDisplay(
+            textStyle: textStyle,
+            items: [
+              FlipFlapWidgetItem(
+                child: Center(child: Text(randomEm, style: textStyle)),
+                constraints: widgetConstraints,
+              ),
+              FlipFlapWidgetItem(
+                child: Column(
+                  children: [
+                    Text(
+                      isOdd ? hoursText : monthName,
+                      style: textStyle.copyWith(
+                        color: isOdd ? Colors.red : Colors.orangeAccent,
+                        fontSize: fontSize / 2.3,
+                      ),
+                    ),
+                    Text(
+                      isOdd ? minutesText : dayName,
+                      style: textStyle.copyWith(
+                        color: isOdd ? Colors.red : Colors.orangeAccent,
+                        fontSize: fontSize / 2.3,
+                      ),
+                    ),
+                  ],
+                ),
+                constraints: unitConstraints.copyWith(minWidth: unitConstraints.minWidth * 4),
+              ),
+              FlipFlapWidgetItem(
+                child: Center(
+                  child: Text(
+                    secondsText,
+                    style: textStyle.copyWith(color: isOdd ? Colors.red : Colors.orangeAccent, fontSize: fontSize),
+                  ),
+                ),
+                constraints: widgetConstraints,
+              ),
+            ],
+            unitConstraints: unitConstraints,
+          ),
+        ],
       ),
     );
   }
+}
+
+const emojiRanges = [
+  [0x1F600, 0x1F64F],
+  [0x1F680, 0x1F6FF],
+  [0x1F300, 0x1F5FF],
+  [0x1F900, 0x1F9FF],
+];
+
+String getRandomEmoji() {
+  final random = Random();
+  final range = emojiRanges[random.nextInt(emojiRanges.length)];
+  final codePoint = range[0] + random.nextInt(range[1] - range[0]);
+  return String.fromCharCode(codePoint);
 }

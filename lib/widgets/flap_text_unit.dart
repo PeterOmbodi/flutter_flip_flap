@@ -1,40 +1,24 @@
 import 'dart:math';
 
-
 import 'package:flutter/material.dart';
+import 'package:flutter_flip_flap/models/flip_flap_item.dart';
 import 'package:flutter_flip_flap/widgets/unit_tile.dart';
 
-enum UnitType { character, number, special, mixed, text }
-
-extension UnitTypeX on UnitType {
-  List<String> get defValues => switch (this) {
-    UnitType.character => ['', ...List<String>.generate(26, (final i) => String.fromCharCode(65 + i))],
-    UnitType.number => ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    UnitType.special => ['', '!', '@', '#', '\u007f', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+'],
-    UnitType.mixed => [
-      '',
-      ...List<String>.generate(26, (final i) => String.fromCharCode(65 + i)),
-      ...['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
-    ],
-    UnitType.text => [],
-  };
-}
-
-class FlapUnit extends StatefulWidget {
-  const FlapUnit({
+class FlapTextUnit extends StatefulWidget {
+  FlapTextUnit({
     super.key,
     this.cardsInPack = 1,
     required this.text,
-    this.values = const [],
+    final List<String>? values,
     this.useShortestWay = true,
     this.textStyle,
     this.unitDecoration,
     required this.unitConstraints,
     this.displayType = UnitType.mixed,
-  });
+  }) : values = values ?? displayType.defValues;
 
   final String text;
-  final List<String>? values;
+  final List<String> values;
   final UnitType displayType;
   final int cardsInPack;
   final bool useShortestWay;
@@ -43,10 +27,10 @@ class FlapUnit extends StatefulWidget {
   final BoxConstraints unitConstraints;
 
   @override
-  State<FlapUnit> createState() => _FlapUnitState();
+  State<FlapTextUnit> createState() => _FlapTextUnitState();
 }
 
-class _FlapUnitState extends State<FlapUnit> with TickerProviderStateMixin {
+class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation _animation;
 
@@ -69,7 +53,7 @@ class _FlapUnitState extends State<FlapUnit> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    _values = (widget.values == null || widget.values!.isEmpty) ? widget.displayType.defValues : widget.values!;
+    _values = widget.values;
 
     if (!_values.contains(targetValue)) {
       _values = List<String>.from(_values)..add(targetValue);
@@ -92,11 +76,10 @@ class _FlapUnitState extends State<FlapUnit> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(final FlapUnit oldWidget) {
+  void didUpdateWidget(final FlapTextUnit oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.text != widget.text) {
-      final provided = widget.values;
-      _values = (provided == null || provided.isEmpty) ? widget.displayType.defValues : provided;
+      _values = widget.values;
 
       final prevValue = oldWidget.text;
       final nextTarget = targetValue;
@@ -232,7 +215,9 @@ class _FlapUnitState extends State<FlapUnit> with TickerProviderStateMixin {
   void _nextStep(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       _secondStage = true;
-      final secondPhaseCurve = nextValue == targetValue ? FlippedCurve(_BackOutCurve(overshoot: 2.8)) : Curves.easeInCubic;
+      final secondPhaseCurve = nextValue == targetValue
+          ? FlippedCurve(_BackOutCurve(overshoot: 2.8))
+          : Curves.easeInCubic;
       _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: secondPhaseCurve)).animate(_controller);
       _controller.reverse();
     }
