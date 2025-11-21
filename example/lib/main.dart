@@ -28,7 +28,7 @@ class FlipFlapClock extends StatefulWidget {
 
 class _FlipFlapClockState extends State<FlipFlapClock> {
   Timer? _timer;
-  String _time = _formatTime(DateTime.now());
+  DateTime _dateTime = DateTime.now();
 
   @override
   void initState() {
@@ -37,9 +37,9 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
     final initialDelay = Duration(milliseconds: 1000 - now.millisecond);
     _timer = Timer(initialDelay, () {
       if (!mounted) return;
-      setState(() => _time = _formatTime(DateTime.now()));
+      setState(() => _dateTime = DateTime.now());
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        setState(() => _time = _formatTime(DateTime.now()));
+        setState(() => _dateTime = DateTime.now());
       });
     });
   }
@@ -60,7 +60,8 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final horizontalPadding = 32.0;
     final available = (screenWidth - horizontalPadding).clamp(200.0, double.infinity);
-    final units = _time.length;
+    final formattedTime = _formatTime(_dateTime);
+    final units = formattedTime.length;
     final unitWidth = (available / units).clamp(24.0, 96.0);
     final unitHeight = unitWidth * 1.7;
     final fontSize = unitHeight * 0.75;
@@ -68,13 +69,13 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
     final widgetConstraints = unitConstraints.copyWith(minWidth: unitConstraints.minWidth * 2);
     final textStyle = FlipFlapTheme.of(context).textStyle.copyWith(fontSize: fontSize);
 
-    final splitTime = _time.split(':');
-    final hoursText = splitTime.first;
-    final minutesText = splitTime[1];
+    final splitTime = formattedTime.split(':');
     final secondsText = splitTime.last;
-    final now = DateTime.now();
-    final dayName = DateFormat.EEEE().format(now);
-    final monthName = DateFormat.MMMM().format(now);
+
+    final dayName = DateFormat.EEEE().format(_dateTime);
+    final year = DateFormat.y().format(_dateTime);
+    final date = DateFormat('MMMM, d').format(_dateTime);
+
     final isOdd = int.parse(secondsText) % 2 == 1;
     final randomEm = getRandomEmoji();
 
@@ -84,9 +85,9 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: 8,
         children: [
-          FlipFlapDisplay.fromText(text: _time, textStyle: textStyle, unitConstraints: unitConstraints),
+          FlipFlapDisplay.fromText(text: formattedTime, textStyle: textStyle, unitConstraints: unitConstraints),
           FlipFlapDisplay.fromText(
-            text: _time,
+            text: formattedTime,
             textStyle: textStyle,
             unitConstraints: unitConstraints,
             unitType: UnitType.text,
@@ -102,14 +103,14 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
                 child: Column(
                   children: [
                     Text(
-                      isOdd ? hoursText : monthName,
+                      isOdd ? formattedTime : date,
                       style: textStyle.copyWith(
                         color: isOdd ? Colors.red : Colors.orangeAccent,
                         fontSize: fontSize / 2.3,
                       ),
                     ),
                     Text(
-                      isOdd ? minutesText : dayName,
+                      isOdd ? dayName : year,
                       style: textStyle.copyWith(
                         color: isOdd ? Colors.red : Colors.orangeAccent,
                         fontSize: fontSize / 2.3,
