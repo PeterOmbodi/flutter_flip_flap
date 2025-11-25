@@ -10,7 +10,6 @@ topics:
   - animation
   - flip
   - split-flap
-  - display
 
 environment:
   sdk: ^3.9.0

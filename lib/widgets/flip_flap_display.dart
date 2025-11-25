@@ -36,28 +36,6 @@ class FlipFlapDisplay extends StatelessWidget {
     );
   }
 
-  //
-  // factory FlapDisplay.mapped({
-  //   final Key? key,
-  //   required final String text,
-  //   required final FlipFlapTextItem Function(int index, String char) mapper,
-  //   required final BoxConstraints unitConstraints,
-  //   final TextStyle? textStyle,
-  //   final Decoration? displayDecoration,
-  //   final Decoration? unitDecoration,
-  // }) {
-  //   final chars = text.characters.toList();
-  //   final items = <FlipFlapItem>[for (int i = 0; i < chars.length; i++) mapper(i, chars[i])];
-  //   return FlapDisplay(
-  //     key: key,
-  //     items: items,
-  //     unitConstraints: unitConstraints,
-  //     textStyle: textStyle,
-  //     displayDecoration: displayDecoration,
-  //     unitDecoration: unitDecoration,
-  //   );
-  // }
-
   final List<FlipFlapItem> items;
   final TextStyle? textStyle;
   final Decoration? displayDecoration;
