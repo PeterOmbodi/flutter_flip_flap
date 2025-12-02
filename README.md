@@ -7,7 +7,8 @@ flutter_flip_flap - a customizable split-flap / flip display for Flutter. Ideal 
 - Theming through `FlipFlapTheme` or per-widget `Decoration` / `TextStyle`.
 - Clock demo with mixed content in `example/lib/main.dart`.
 
-## Live demo 
+## Live demo
+You can see examle **here**: [Run example][demo]
 [demo]: https://peterombodi.github.io/flutter_flip_flap/
 
 ## Installation
