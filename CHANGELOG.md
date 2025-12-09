@@ -14,3 +14,6 @@
 - add flapped child widget
 - improve flapped text unit
 - use flapped widget in example
+
+## 0.2.1
+- link to web live demo in read.me
