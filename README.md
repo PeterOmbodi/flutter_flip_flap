@@ -2,7 +2,7 @@ flutter_flip_flap - a customizable split-flap / flip display for Flutter. Ideal 
 
 ## Features
 - Text items and arbitrary widget items on the same rail (`FlipFlapTextItem` and `FlipFlapWidgetItem`).
-- Two modes: direct flips and multi-card scrolling between values.
+- Two modes: mechanical flap (split) and 3D flip, with axis and direction control.
 - Flexible symbol sets via `UnitType` or your own `values`, control of cards per pack, and direction.
 - Theming through `FlipFlapTheme` or per-widget `Decoration` / `TextStyle`.
 - Clock demo with mixed content in `example/lib/main.dart`.
@@ -55,9 +55,17 @@ Widget build(BuildContext context) {
     unitConstraints: const BoxConstraints(minWidth: 56, minHeight: 96, maxHeight: 96),
     textStyle: const TextStyle(fontSize: 48, color: Colors.orangeAccent),
     items: const [
-      FlipFlapWidgetItem(child: Icon(Icons.flight_takeoff, size: 48)),
-      FlipFlapTextItem('A', type: UnitType.character, cardsInPack: 3),
-      FlipFlapTextItem('12', type: UnitType.text), // not limited by alphabet
+      // Mechanical flap
+      FlipFlapWidgetItem.flap(child: Icon(Icons.flight_takeoff, size: 48)),
+      FlipFlapTextItem.flap('A', unitType: UnitType.character, cardsInPack: 3),
+      // 3D flip (horizontal axis, backward direction)
+      FlipFlapWidgetItem.flip(
+        child: Icon(Icons.swap_horiz, size: 48),
+        flipAxis: Axis.horizontal,
+        flipDirection: FlipDirection.backward,
+      ),
+      // Not limited by alphabet
+      FlipFlapTextItem.flap('12', unitType: UnitType.text),
     ],
   );
 }
@@ -68,6 +76,8 @@ Widget build(BuildContext context) {
 - `cardsInPack` - how many intermediate cards the animation scrolls (>=2 adds rolling effect).
 - `unitType` / `values` - allowed symbols or custom list.
 - `useShortestWay` - pick shortest path on the circular alphabet or not.
+- `ItemType` / `flipAxis` / `flipDirection` - choose mechanical flap or 3D flip and its orientation.
+- `duration` / `durationJitterMs` - per item or per display animation timing.
 - `displayDecoration` / `unitDecoration` / `textStyle` - per-widget styling or via theme.
 
 ### Theming

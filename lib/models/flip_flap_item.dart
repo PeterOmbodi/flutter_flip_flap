@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+enum ItemType { flap, flip}
+enum FlipDirection { forward, backward }
 enum UnitType { character, number, special, mixed, text, widget }
 
 extension UnitTypeX on UnitType {
@@ -18,20 +20,123 @@ extension UnitTypeX on UnitType {
 }
 
 sealed class FlipFlapItem {
-  const FlipFlapItem();
+  const FlipFlapItem({
+    this.duration,
+    this.durationJitterMs,
+    this.type = ItemType.flap,
+    this.flipAxis,
+    this.flipDirection,
+  });
+
+  final ItemType type;
+  final Duration? duration;
+  final int? durationJitterMs;
+  final Axis? flipAxis;
+  final FlipDirection? flipDirection;
 }
 
 class FlipFlapTextItem extends FlipFlapItem {
-  const FlipFlapTextItem(this.text, {this.type = UnitType.mixed, this.values, this.cardsInPack = 2});
+  const FlipFlapTextItem._(
+    this.text, {
+    this.unitType = UnitType.mixed,
+    this.values,
+    this.cardsInPack = 2,
+    required super.type,
+    super.flipAxis,
+    super.flipDirection,
+    super.duration,
+    super.durationJitterMs,
+  });
+
+  factory FlipFlapTextItem.flap(
+    final String text, {
+    final UnitType unitType = UnitType.mixed,
+    final List<String>? values,
+    final int cardsInPack = 2,
+    final Duration? duration,
+    final int? durationJitterMs,
+  }) => FlipFlapTextItem._(
+    text,
+    unitType: unitType,
+    values: values,
+    cardsInPack: cardsInPack,
+    type: ItemType.flap,
+    duration: duration,
+    durationJitterMs: durationJitterMs,
+  );
+
+  factory FlipFlapTextItem.flip(
+    final String text, {
+    final UnitType unitType = UnitType.mixed,
+    final List<String>? values,
+    final int cardsInPack = 2,
+    required final Axis flipAxis,
+    final FlipDirection flipDirection = FlipDirection.forward,
+    final Duration? duration,
+    final int? durationJitterMs,
+  }) => FlipFlapTextItem._(
+    text,
+    unitType: unitType,
+    values: values,
+    cardsInPack: cardsInPack,
+    type: ItemType.flip,
+    flipAxis: flipAxis,
+    flipDirection: flipDirection,
+    duration: duration,
+    durationJitterMs: durationJitterMs,
+  );
 
   final String text;
-  final UnitType type;
+  final UnitType unitType;
   final List<String>? values;
   final int cardsInPack;
 }
 
 class FlipFlapWidgetItem extends FlipFlapItem {
-  const FlipFlapWidgetItem({this.key, required this.child, this.constraints});
+  const FlipFlapWidgetItem._({
+    this.key,
+    required this.child,
+    this.constraints,
+    required super.type,
+    super.flipAxis,
+    super.flipDirection,
+    super.duration,
+    super.durationJitterMs,
+  });
+
+  factory FlipFlapWidgetItem.flap({
+    final Key? key,
+    required final Widget child,
+    final BoxConstraints? constraints,
+    final Duration? duration,
+    final int? durationJitterMs,
+  }) => FlipFlapWidgetItem._(
+    key: key,
+    child: child,
+    constraints: constraints,
+    type: ItemType.flap,
+    duration: duration,
+    durationJitterMs: durationJitterMs,
+  );
+
+  factory FlipFlapWidgetItem.flip({
+    final Key? key,
+    required final Widget child,
+    final BoxConstraints? constraints,
+    required final Axis flipAxis,
+    final FlipDirection flipDirection = FlipDirection.forward,
+    final Duration? duration,
+    final int? durationJitterMs,
+  }) => FlipFlapWidgetItem._(
+    key: key,
+    child: child,
+    constraints: constraints,
+    type: ItemType.flip,
+    flipAxis: flipAxis,
+    flipDirection: flipDirection,
+    duration: duration,
+    durationJitterMs: durationJitterMs,
+  );
 
   final Key? key;
   final Widget child;

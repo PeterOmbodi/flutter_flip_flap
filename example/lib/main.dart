@@ -95,11 +95,11 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
           FlipFlapDisplay(
             textStyle: textStyle,
             items: [
-              FlipFlapWidgetItem(
+              FlipFlapWidgetItem.flap(
                 child: Center(child: Text(randomEm, style: textStyle)),
                 constraints: widgetConstraints,
               ),
-              FlipFlapWidgetItem(
+              FlipFlapWidgetItem.flap(
                 child: Column(
                   children: [
                     Text(
@@ -120,13 +120,63 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
                 ),
                 constraints: unitConstraints.copyWith(minWidth: unitConstraints.minWidth * 4),
               ),
-              FlipFlapWidgetItem(
+              FlipFlapWidgetItem.flap(
                 child: Center(
                   child: Text(
                     secondsText,
                     style: textStyle.copyWith(color: isOdd ? Colors.red : Colors.orangeAccent, fontSize: fontSize),
                   ),
                 ),
+                constraints: widgetConstraints,
+              ),
+            ],
+            unitConstraints: unitConstraints,
+          ),
+          FlipFlapDisplay(
+            textStyle: textStyle,
+            items: [
+              FlipFlapWidgetItem.flip(
+                child: Center(child: Text(randomEm, style: textStyle)),
+                constraints: widgetConstraints,
+                flipAxis: Axis.horizontal,
+                duration: const Duration(milliseconds: 400),
+                durationJitterMs: 100,
+              ),
+              FlipFlapWidgetItem.flip(
+                child: Column(
+                  children: [
+                    Text(
+                      isOdd ? formattedTime : date,
+                      style: textStyle.copyWith(
+                        color: isOdd ? Colors.red : Colors.orangeAccent,
+                        fontSize: fontSize / 2.3,
+                      ),
+                    ),
+                    Text(
+                      isOdd ? dayName : year,
+                      style: textStyle.copyWith(
+                        color: isOdd ? Colors.red : Colors.orangeAccent,
+                        fontSize: fontSize / 2.3,
+                      ),
+                    ),
+                  ],
+                ),
+                flipAxis: Axis.vertical,
+                flipDirection: FlipDirection.backward,
+                duration: const Duration(milliseconds: 400),
+                constraints: unitConstraints.copyWith(minWidth: unitConstraints.minWidth * 4),
+              ),
+              FlipFlapWidgetItem.flip(
+                child: Center(
+                  child: Text(
+                    secondsText,
+                    style: textStyle.copyWith(color: isOdd ? Colors.red : Colors.orangeAccent, fontSize: fontSize),
+                  ),
+                ),
+                flipAxis: Axis.horizontal,
+                duration: const Duration(milliseconds: 300),
+                durationJitterMs: 200,
+                flipDirection: FlipDirection.backward,
                 constraints: widgetConstraints,
               ),
             ],

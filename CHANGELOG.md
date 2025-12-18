@@ -20,3 +20,8 @@
 
 ## 0.2.2
 - refactor code 
+
+## 0.3.0
+- add flip unit
+- use flip unit in example
+- update example and read.me
