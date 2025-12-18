@@ -1,10 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_flip_flap/models/flip_flap_item.dart';
-import 'package:flutter_flip_flap/widgets/flap_animator.dart';
-import 'package:flutter_flip_flap/widgets/jitter_duration_mixin.dart';
-import 'package:flutter_flip_flap/widgets/unit_tile.dart';
+import 'package:flutter_flip_flap/widgets/core/flap_animator.dart';
+import 'package:flutter_flip_flap/widgets/core/flap_controller_mixin.dart';
+import 'package:flutter_flip_flap/widgets/core/flap_curves.dart';
+import 'package:flutter_flip_flap/widgets/core/jitter_duration_mixin.dart';
+import 'package:flutter_flip_flap/widgets/flap/unit_tile.dart';
 
 class FlapTextUnit extends StatefulWidget {
   FlapTextUnit({
@@ -36,13 +36,11 @@ class FlapTextUnit extends StatefulWidget {
   State<FlapTextUnit> createState() => _FlapTextUnitState();
 }
 
-class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMixin, JitterDurationMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
+class _FlapTextUnitState extends State<FlapTextUnit>
+    with TickerProviderStateMixin, JitterDurationMixin, FlapControllerMixin {
 
   List<String> _values = <String>[];
   List<String> _plannedValues = <String>[];
-  bool _secondStage = false;
   String _currentValue = '';
   int _currentPlannedIndex = 0;
 
@@ -69,16 +67,7 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
     _currentPlannedIndex = 0;
     _plannedValues = <String>[_currentValue];
 
-    _controller =
-        AnimationController(
-            vsync: this,
-            duration: _effectiveDuration,
-          )
-          ..addStatusListener(_nextStep)
-          ..addListener(() {
-            setState(() {});
-          });
-    _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+    initFlapController(onStatus: _nextStep);
   }
 
   @override
@@ -105,8 +94,8 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
         _plannedValues = <String>[nextTarget];
         _currentValue = nextTarget;
         _currentPlannedIndex = 0;
-        if (_controller.isAnimating) {
-          _controller.stop();
+        if (flapController.isAnimating) {
+          flapController.stop();
         }
         setState(() {});
         return;
@@ -119,20 +108,15 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
         cardsInPack: widget.cardsInPack,
         useShortestWay: widget.useShortestWay,
       );
-      if (!_controller.isAnimating) {
-        _controller.duration = _effectiveDuration;
-        _animation = Tween<double>(
-          begin: 0,
-          end: pi / 2,
-        ).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
-        _controller.forward(from: 0);
+      if (!flapController.isAnimating) {
+        restartFlapAnimation();
       }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    disposeFlapController();
     super.dispose();
   }
 
@@ -157,32 +141,26 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
       child: FlapAnimator(
         currentFace: currentFace,
         nextFace: nextFace,
-        animation: _animation,
-        secondStage: _secondStage,
+        animation: flapAnimation,
+        secondStage: flapSecondStage,
       ),
     );
   }
 
   void _nextStep(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      _secondStage = true;
-      final secondPhaseCurve = nextValue == targetValue
-          ? FlippedCurve(_BackOutCurve(overshoot: 2.8))
-          : Curves.easeInCubic;
-      _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: secondPhaseCurve)).animate(_controller);
-      _controller.reverse();
+      flapSecondStage = true;
+      final secondPhaseCurve = flapSecondPhaseCurve(hasChange: nextValue == targetValue);
+      flapAnimation = buildFlapAnimation(curve: secondPhaseCurve);
+      flapController.reverse();
     }
     if (status == AnimationStatus.dismissed) {
       _currentValue = nextValue;
       _currentPlannedIndex = nextIndex;
-      _secondStage = false;
-      _animation = Tween<double>(
-        begin: 0,
-        end: pi / 2,
-      ).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+      flapSecondStage = false;
+      flapAnimation = buildFlapAnimation(curve: Curves.easeInCubic);
       if (_currentValue != targetValue) {
-        _controller.duration = _effectiveDuration;
-        _controller.forward();
+        restartFlapAnimation();
       }
     }
   }
@@ -191,6 +169,9 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
     base: widget.duration,
     jitterMs: widget.durationJitterMs,
   );
+
+  @override
+  Duration get flapDuration => _effectiveDuration;
 
   List<String> _planSequence({
     required final List<String> values,
@@ -266,19 +247,5 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
     if (result.first != from) result[0] = from;
     if (result.last != to) result[result.length - 1] = to;
     return result;
-  }
-}
-
-class _BackOutCurve extends Curve {
-  const _BackOutCurve({this.overshoot = 2.5});
-
-  final double overshoot;
-
-  @override
-  double transformInternal(double t) {
-    // Classic backOut: t -> t-1; return t*t*((s+1)*t + s) + 1
-    final s = overshoot;
-    t -= 1.0;
-    return t * t * ((s + 1) * t + s) + 1.0;
   }
 }
