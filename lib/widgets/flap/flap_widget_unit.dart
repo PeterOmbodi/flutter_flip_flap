@@ -1,8 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_flip_flap/widgets/flap_animator.dart';
-import 'package:flutter_flip_flap/widgets/jitter_duration_mixin.dart';
+import 'package:flutter_flip_flap/widgets/core/flap_animator.dart';
+import 'package:flutter_flip_flap/widgets/core/flap_controller_mixin.dart';
+import 'package:flutter_flip_flap/widgets/core/flap_curves.dart';
+import 'package:flutter_flip_flap/widgets/core/jitter_duration_mixin.dart';
 
 class FlapWidgetUnit extends StatefulWidget {
   const FlapWidgetUnit({
@@ -26,10 +26,8 @@ class FlapWidgetUnit extends StatefulWidget {
   State<FlapWidgetUnit> createState() => _FlapWidgetUnitState();
 }
 
-class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStateMixin, JitterDurationMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-  bool _secondStage = false;
+class _FlapWidgetUnitState extends State<FlapWidgetUnit>
+    with TickerProviderStateMixin, JitterDurationMixin, FlapControllerMixin {
 
   late Widget _currentChild;
   late Widget _nextChild;
@@ -39,14 +37,7 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
     super.initState();
     _currentChild = widget.child;
     _nextChild = widget.child;
-    _controller =
-        AnimationController(
-            vsync: this,
-            duration: _effectiveDuration,
-          )
-          ..addStatusListener(_nextStep)
-          ..addListener(() => setState(() {}));
-    _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+    initFlapController(onStatus: _nextStep);
   }
 
   @override
@@ -54,35 +45,27 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.child, widget.child)) {
       _nextChild = widget.child;
-      if (!_controller.isAnimating) {
-        _secondStage = false;
-        _controller.duration = _effectiveDuration;
-        _animation = Tween<double>(
-          begin: 0,
-          end: pi / 2,
-        ).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
-        _controller.forward(from: 0);
+      if (!flapController.isAnimating) {
+        restartFlapAnimation();
       }
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    disposeFlapController();
     super.dispose();
   }
 
   void _nextStep(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      _secondStage = true;
-      final secondPhaseCurve = _nextChild.hashCode != _currentChild.hashCode
-          ? FlippedCurve(_BackOutCurve(overshoot: 2.8))
-          : Curves.easeInCubic;
-      _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: secondPhaseCurve)).animate(_controller);
-      _controller.reverse();
+      flapSecondStage = true;
+      final secondPhaseCurve = flapSecondPhaseCurve(hasChange: _nextChild.hashCode != _currentChild.hashCode);
+      flapAnimation = buildFlapAnimation(curve: secondPhaseCurve);
+      flapController.reverse();
     } else if (status == AnimationStatus.dismissed) {
       _currentChild = _nextChild;
-      _secondStage = false;
+      flapSecondStage = false;
       if (!mounted) return;
       setState(() {});
     }
@@ -92,6 +75,9 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
     base: widget.duration,
     jitterMs: widget.durationJitterMs,
   );
+
+  @override
+  Duration get flapDuration => _effectiveDuration;
 
   @override
   Widget build(final BuildContext context) => FlapAnimator(
@@ -105,8 +91,8 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
       decoration: widget.unitDecoration,
       child: _nextChild,
     ),
-    animation: _animation,
-    secondStage: _secondStage,
+    animation: flapAnimation,
+    secondStage: flapSecondStage,
   );
 }
 
@@ -122,17 +108,4 @@ class _UnitFace extends StatelessWidget {
     constraints: constraints,
     child: DecoratedBox(decoration: decoration ?? const BoxDecoration(), child: child),
   );
-}
-
-class _BackOutCurve extends Curve {
-  const _BackOutCurve({this.overshoot = 2.5});
-
-  final double overshoot;
-
-  @override
-  double transformInternal(double t) {
-    final s = overshoot;
-    t -= 1.0;
-    return t * t * ((s + 1) * t + s) + 1.0;
-  }
 }

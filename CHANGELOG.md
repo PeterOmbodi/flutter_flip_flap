@@ -17,3 +17,6 @@
 
 ## 0.2.1
 - link to web live demo in read.me
+
+## 0.2.2
+- refactor code 

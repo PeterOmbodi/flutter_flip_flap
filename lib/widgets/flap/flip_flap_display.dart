@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_flip_flap/models/flip_flap_item.dart';
 import 'package:flutter_flip_flap/split_flap_theme.dart';
-import 'package:flutter_flip_flap/widgets/flap_text_unit.dart';
-import 'package:flutter_flip_flap/widgets/flap_widget_unit.dart';
+import 'package:flutter_flip_flap/widgets/flap/flap_text_unit.dart';
+import 'package:flutter_flip_flap/widgets/flap/flap_widget_unit.dart';
 
 class FlipFlapDisplay extends StatelessWidget {
   const FlipFlapDisplay({
