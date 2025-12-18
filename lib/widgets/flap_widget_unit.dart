@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_flip_flap/widgets/flap_animator.dart';
+import 'package:flutter_flip_flap/widgets/jitter_duration_mixin.dart';
 
 class FlapWidgetUnit extends StatefulWidget {
   const FlapWidgetUnit({
@@ -8,23 +10,25 @@ class FlapWidgetUnit extends StatefulWidget {
     required this.unitConstraints,
     required this.child,
     this.unitDecoration,
-    this.duration,
+    this.duration = const Duration(milliseconds: 200),
+    this.durationJitterMs = 50,
     this.textStyle,
   });
 
   final BoxConstraints unitConstraints;
   final Decoration? unitDecoration;
   final Widget child;
-  final Duration? duration;
+  final Duration duration;
+  final int durationJitterMs;
   final TextStyle? textStyle;
 
   @override
   State<FlapWidgetUnit> createState() => _FlapWidgetUnitState();
 }
 
-class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStateMixin {
+class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStateMixin, JitterDurationMixin {
   late AnimationController _controller;
-  late Animation _animation;
+  late Animation<double> _animation;
   bool _secondStage = false;
 
   late Widget _currentChild;
@@ -38,11 +42,11 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
     _controller =
         AnimationController(
             vsync: this,
-            duration: widget.duration ?? Duration(milliseconds: 200 + Random().nextInt(50)),
+            duration: _effectiveDuration,
           )
           ..addStatusListener(_nextStep)
           ..addListener(() => setState(() {}));
-    _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+    _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
   }
 
   @override
@@ -52,7 +56,11 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
       _nextChild = widget.child;
       if (!_controller.isAnimating) {
         _secondStage = false;
-        _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+        _controller.duration = _effectiveDuration;
+        _animation = Tween<double>(
+          begin: 0,
+          end: pi / 2,
+        ).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
         _controller.forward(from: 0);
       }
     }
@@ -70,7 +78,7 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
       final secondPhaseCurve = _nextChild.hashCode != _currentChild.hashCode
           ? FlippedCurve(_BackOutCurve(overshoot: 2.8))
           : Curves.easeInCubic;
-      _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: secondPhaseCurve)).animate(_controller);
+      _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: secondPhaseCurve)).animate(_controller);
       _controller.reverse();
     } else if (status == AnimationStatus.dismissed) {
       _currentChild = _nextChild;
@@ -80,78 +88,25 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit> with TickerProviderStat
     }
   }
 
+  Duration get _effectiveDuration => effectiveDuration(
+    base: widget.duration,
+    jitterMs: widget.durationJitterMs,
+  );
+
   @override
-  Widget build(final BuildContext context) => IntrinsicWidth(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Stack(
-          children: [
-            ClipRect(
-              child: Align(
-                alignment: Alignment.topCenter,
-                heightFactor: 0.495,
-                child: _UnitFace(
-                  constraints: widget.unitConstraints,
-                  decoration: widget.unitDecoration,
-                  child: _nextChild,
-                ),
-              ),
-            ),
-            Transform(
-              alignment: Alignment.bottomCenter,
-              transform: Matrix4.identity()
-                ..setEntry(2, 2, 0.005)
-                ..rotateX(_secondStage ? pi / 2 : _animation.value / 1),
-              child: ClipRect(
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  heightFactor: 0.495,
-                  child: _UnitFace(
-                    constraints: widget.unitConstraints,
-                    decoration: widget.unitDecoration,
-                    child: _currentChild,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        Container(color: Theme.of(context).primaryColor, height: 0.5),
-        Stack(
-          children: [
-            ClipRect(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                heightFactor: 0.495,
-                child: _UnitFace(
-                  constraints: widget.unitConstraints,
-                  decoration: widget.unitDecoration,
-                  child: _currentChild,
-                ),
-              ),
-            ),
-            Transform(
-              alignment: Alignment.topCenter,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, 0.005)
-                ..rotateX(_secondStage ? -_animation.value : pi / 2),
-              child: ClipRect(
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  heightFactor: 0.495,
-                  child: _UnitFace(
-                    constraints: widget.unitConstraints,
-                    decoration: widget.unitDecoration,
-                    child: _nextChild,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
+  Widget build(final BuildContext context) => FlapAnimator(
+    currentFace: _UnitFace(
+      constraints: widget.unitConstraints,
+      decoration: widget.unitDecoration,
+      child: _currentChild,
     ),
+    nextFace: _UnitFace(
+      constraints: widget.unitConstraints,
+      decoration: widget.unitDecoration,
+      child: _nextChild,
+    ),
+    animation: _animation,
+    secondStage: _secondStage,
   );
 }
 
@@ -165,10 +120,7 @@ class _UnitFace extends StatelessWidget {
   @override
   Widget build(final BuildContext context) => ConstrainedBox(
     constraints: constraints,
-    child: DecoratedBox(
-      decoration: decoration ?? const BoxDecoration(),
-      child: child,
-    ),
+    child: DecoratedBox(decoration: decoration ?? const BoxDecoration(), child: child),
   );
 }
 

@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_flip_flap/models/flip_flap_item.dart';
+import 'package:flutter_flip_flap/widgets/flap_animator.dart';
+import 'package:flutter_flip_flap/widgets/jitter_duration_mixin.dart';
 import 'package:flutter_flip_flap/widgets/unit_tile.dart';
 
 class FlapTextUnit extends StatefulWidget {
@@ -10,6 +12,8 @@ class FlapTextUnit extends StatefulWidget {
     this.cardsInPack = 1,
     required this.text,
     final List<String>? values,
+    this.duration = const Duration(milliseconds: 200),
+    this.durationJitterMs = 50,
     this.useShortestWay = true,
     this.textStyle,
     this.unitDecoration,
@@ -22,6 +26,8 @@ class FlapTextUnit extends StatefulWidget {
   final UnitType displayType;
   final int cardsInPack;
   final bool useShortestWay;
+  final Duration duration;
+  final int durationJitterMs;
   final TextStyle? textStyle;
   final Decoration? unitDecoration;
   final BoxConstraints unitConstraints;
@@ -30,9 +36,9 @@ class FlapTextUnit extends StatefulWidget {
   State<FlapTextUnit> createState() => _FlapTextUnitState();
 }
 
-class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMixin {
+class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMixin, JitterDurationMixin {
   late AnimationController _controller;
-  late Animation _animation;
+  late Animation<double> _animation;
 
   List<String> _values = <String>[];
   List<String> _plannedValues = <String>[];
@@ -66,13 +72,13 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
     _controller =
         AnimationController(
             vsync: this,
-            duration: Duration(milliseconds: 200 + Random().nextInt(50)),
+            duration: _effectiveDuration,
           )
           ..addStatusListener(_nextStep)
           ..addListener(() {
             setState(() {});
           });
-    _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+    _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
   }
 
   @override
@@ -114,7 +120,11 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
         useShortestWay: widget.useShortestWay,
       );
       if (!_controller.isAnimating) {
-        _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+        _controller.duration = _effectiveDuration;
+        _animation = Tween<double>(
+          begin: 0,
+          end: pi / 2,
+        ).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
         _controller.forward(from: 0);
       }
     }
@@ -130,84 +140,25 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
   Widget build(final BuildContext context) {
     final nextChar = nextValue;
     final currentChar = _currentValue;
+    final nextFace = UnitTile(
+      text: nextChar,
+      constraints: widget.unitConstraints,
+      decoration: widget.unitDecoration,
+      textStyle: widget.textStyle,
+    );
+    final currentFace = UnitTile(
+      text: currentChar,
+      constraints: widget.unitConstraints,
+      decoration: widget.unitDecoration,
+      textStyle: widget.textStyle,
+    );
     return Padding(
       padding: const EdgeInsets.all(0.0),
-      child: IntrinsicWidth(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              children: [
-                ClipRect(
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    heightFactor: 0.495,
-                    child: UnitTile(
-                      text: nextChar,
-                      constraints: widget.unitConstraints,
-                      decoration: widget.unitDecoration,
-                      textStyle: widget.textStyle,
-                    ),
-                  ),
-                ),
-                Transform(
-                  alignment: Alignment.bottomCenter,
-                  transform: Matrix4.identity()
-                    ..setEntry(2, 2, 0.005)
-                    ..rotateX(_secondStage ? pi / 2 : _animation.value / 1),
-                  child: ClipRect(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      heightFactor: 0.495,
-                      child: UnitTile(
-                        text: currentChar,
-                        constraints: widget.unitConstraints,
-                        decoration: widget.unitDecoration,
-                        textStyle: widget.textStyle,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            //todo any sense to extract to theme?
-            Container(color: Theme.of(context).primaryColor, height: 0.5),
-            Stack(
-              children: [
-                ClipRect(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    heightFactor: 0.495,
-                    child: UnitTile(
-                      text: currentChar,
-                      constraints: widget.unitConstraints,
-                      decoration: widget.unitDecoration,
-                      textStyle: widget.textStyle,
-                    ),
-                  ),
-                ),
-                Transform(
-                  alignment: Alignment.topCenter,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.005)
-                    ..rotateX(_secondStage ? -_animation.value / 1 : pi / 2),
-                  child: ClipRect(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      heightFactor: 0.495,
-                      child: UnitTile(
-                        text: nextChar,
-                        constraints: widget.unitConstraints,
-                        decoration: widget.unitDecoration,
-                        textStyle: widget.textStyle,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+      child: FlapAnimator(
+        currentFace: currentFace,
+        nextFace: nextFace,
+        animation: _animation,
+        secondStage: _secondStage,
       ),
     );
   }
@@ -218,19 +169,28 @@ class _FlapTextUnitState extends State<FlapTextUnit> with TickerProviderStateMix
       final secondPhaseCurve = nextValue == targetValue
           ? FlippedCurve(_BackOutCurve(overshoot: 2.8))
           : Curves.easeInCubic;
-      _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: secondPhaseCurve)).animate(_controller);
+      _animation = Tween<double>(begin: 0, end: pi / 2).chain(CurveTween(curve: secondPhaseCurve)).animate(_controller);
       _controller.reverse();
     }
     if (status == AnimationStatus.dismissed) {
       _currentValue = nextValue;
       _currentPlannedIndex = nextIndex;
       _secondStage = false;
-      _animation = Tween(begin: 0, end: pi / 2).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
+      _animation = Tween<double>(
+        begin: 0,
+        end: pi / 2,
+      ).chain(CurveTween(curve: Curves.easeInCubic)).animate(_controller);
       if (_currentValue != targetValue) {
+        _controller.duration = _effectiveDuration;
         _controller.forward();
       }
     }
   }
+
+  Duration get _effectiveDuration => effectiveDuration(
+    base: widget.duration,
+    jitterMs: widget.durationJitterMs,
+  );
 
   List<String> _planSequence({
     required final List<String> values,
