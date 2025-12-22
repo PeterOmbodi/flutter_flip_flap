@@ -27,19 +27,30 @@ class FlipFlapClock extends StatefulWidget {
 }
 
 class _FlipFlapClockState extends State<FlipFlapClock> {
+  static final DateFormat _dayFormatter = DateFormat.EEEE();
+  static final DateFormat _yearFormatter = DateFormat.y();
+  static final DateFormat _dateFormatter = DateFormat('MMMM, d');
   Timer? _timer;
   DateTime _dateTime = DateTime.now();
+  late String _emoji;
 
   @override
   void initState() {
     super.initState();
+    _emoji = getRandomEmoji();
     final now = DateTime.now();
     final initialDelay = Duration(milliseconds: 1000 - now.millisecond);
     _timer = Timer(initialDelay, () {
       if (!mounted) return;
-      setState(() => _dateTime = DateTime.now());
+      setState(() {
+        _dateTime = DateTime.now();
+        _emoji = getRandomEmoji();
+      });
       _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        setState(() => _dateTime = DateTime.now());
+        setState(() {
+          _dateTime = DateTime.now();
+          _emoji = getRandomEmoji();
+        });
       });
     });
   }
@@ -72,13 +83,17 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
     final splitTime = formattedTime.split(':');
     final secondsText = splitTime.last;
 
-    final dayName = DateFormat.EEEE().format(_dateTime);
-    final year = DateFormat.y().format(_dateTime);
-    final date = DateFormat('MMMM, d').format(_dateTime);
+    final dayName = _dayFormatter.format(_dateTime);
+    final year = _yearFormatter.format(_dateTime);
+    final date = _dateFormatter.format(_dateTime);
 
     final isOdd = _dateTime.second.isOdd;
+    final accentColor = isOdd ? Colors.red : Colors.orangeAccent;
+    final smallAccentTextStyle = textStyle.copyWith(color: accentColor, fontSize: fontSize / 2.3);
+    final accentTextStyle = textStyle.copyWith(color: accentColor, fontSize: fontSize);
+    final smallTextStyle = textStyle.copyWith(fontSize: fontSize / 2.3);
 
-    final randomEm = getRandomEmoji();
+    final randomEm = _emoji;
     final labelStyle = Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70);
 
     return Padding(
@@ -116,31 +131,14 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
               FlipFlapWidgetItem.flap(
                 child: Column(
                   children: [
-                    Text(
-                      isOdd ? formattedTime : date,
-                      style: textStyle.copyWith(
-                        color: isOdd ? Colors.red : Colors.orangeAccent,
-                        fontSize: fontSize / 2.3,
-                      ),
-                    ),
-                    Text(
-                      isOdd ? dayName : year,
-                      style: textStyle.copyWith(
-                        color: isOdd ? Colors.red : Colors.orangeAccent,
-                        fontSize: fontSize / 2.3,
-                      ),
-                    ),
+                    Text(isOdd ? formattedTime : date, style: smallAccentTextStyle),
+                    Text(isOdd ? dayName : year, style: smallAccentTextStyle),
                   ],
                 ),
                 constraints: unitConstraints.copyWith(minWidth: unitConstraints.minWidth * 4),
               ),
               FlipFlapWidgetItem.flap(
-                child: Center(
-                  child: Text(
-                    secondsText,
-                    style: textStyle.copyWith(color: isOdd ? Colors.red : Colors.orangeAccent, fontSize: fontSize),
-                  ),
-                ),
+                child: Center(child: Text(secondsText, style: accentTextStyle)),
                 constraints: widgetConstraints,
               ),
             ],
@@ -160,20 +158,8 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
               FlipFlapWidgetItem.flip(
                 child: Column(
                   children: [
-                    Text(
-                      isOdd ? formattedTime : date,
-                      style: textStyle.copyWith(
-                        color: isOdd ? Colors.red : Colors.orangeAccent,
-                        fontSize: fontSize / 2.3,
-                      ),
-                    ),
-                    Text(
-                      isOdd ? dayName : year,
-                      style: textStyle.copyWith(
-                        color: isOdd ? Colors.red : Colors.orangeAccent,
-                        fontSize: fontSize / 2.3,
-                      ),
-                    ),
+                    Text(isOdd ? formattedTime : date, style: smallAccentTextStyle),
+                    Text(isOdd ? dayName : year, style: smallAccentTextStyle),
                   ],
                 ),
                 flipAxis: Axis.vertical,
@@ -182,12 +168,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
                 constraints: unitConstraints.copyWith(minWidth: unitConstraints.minWidth * 4),
               ),
               FlipFlapWidgetItem.flip(
-                child: Center(
-                  child: Text(
-                    secondsText,
-                    style: textStyle.copyWith(color: isOdd ? Colors.red : Colors.orangeAccent, fontSize: fontSize),
-                  ),
-                ),
+                child: Center(child: Text(secondsText, style: accentTextStyle)),
                 flipAxis: Axis.horizontal,
                 duration: const Duration(milliseconds: 300),
                 durationJitterMs: 200,
@@ -204,7 +185,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
               final text = isOneEighth ? 'Time- $formattedTime' : date;
               return FlipFlapDisplay.fromText(
                 text: text.padRight(text.length + (16 - text.length) ~/ 2, ' ').padLeft(16, ' '),
-                textStyle: textStyle.copyWith(fontSize: fontSize / 2.3),
+                textStyle: smallTextStyle,
                 unitConstraints: unitConstraints.copyWith(
                   maxHeight: unitConstraints.maxHeight / 2,
                   minHeight: unitConstraints.maxHeight / 2,
@@ -213,27 +194,27 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
                 ),
                 unitsInPack: 5,
               );
-            }
+            },
           ),
           Text('Flip text + unitsInPack: 4', style: labelStyle),
           Builder(
-              builder: (context) {
-                final isOneEighth = ((_dateTime.second + 4) ~/ 8).isOdd;
-                final text = isOneEighth ? dayName : year;
-                return FlipFlapDisplay.fromText(
-                  text: text.padRight(text.length + (16 - text.length) ~/ 2, ' ').padLeft(16, ' '),
-                  textStyle: textStyle.copyWith(fontSize: fontSize / 2.3),
-                  itemType: ItemType.flip,
-                  unitConstraints: unitConstraints.copyWith(
-                    maxHeight: unitConstraints.maxHeight / 2,
-                    minHeight: unitConstraints.maxHeight / 2,
-                    minWidth: unitConstraints.minWidth / 2,
-                    maxWidth: unitConstraints.minWidth / 2,
-                  ),
-                  unitDuration: Duration(milliseconds: 600),
-                  unitsInPack: 4,
-                );
-              }
+            builder: (context) {
+              final isOneEighth = ((_dateTime.second + 4) ~/ 8).isOdd;
+              final text = isOneEighth ? dayName : year;
+              return FlipFlapDisplay.fromText(
+                text: text.padRight(text.length + (16 - text.length) ~/ 2, ' ').padLeft(16, ' '),
+                textStyle: smallTextStyle,
+                itemType: ItemType.flip,
+                unitConstraints: unitConstraints.copyWith(
+                  maxHeight: unitConstraints.maxHeight / 2,
+                  minHeight: unitConstraints.maxHeight / 2,
+                  minWidth: unitConstraints.minWidth / 2,
+                  maxWidth: unitConstraints.minWidth / 2,
+                ),
+                unitDuration: Duration(milliseconds: 600),
+                unitsInPack: 4,
+              );
+            },
           ),
         ],
       ),
@@ -248,9 +229,10 @@ const emojiRanges = [
   [0x1F900, 0x1F9FF],
 ];
 
+final Random _emojiRandom = Random();
+
 String getRandomEmoji() {
-  final random = Random();
-  final range = emojiRanges[random.nextInt(emojiRanges.length)];
-  final codePoint = range[0] + random.nextInt(range[1] - range[0]);
+  final range = emojiRanges[_emojiRandom.nextInt(emojiRanges.length)];
+  final codePoint = range[0] + _emojiRandom.nextInt(range[1] - range[0]);
   return String.fromCharCode(codePoint);
 }
