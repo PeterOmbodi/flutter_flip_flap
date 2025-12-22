@@ -1,25 +1,27 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_flip_flap/models/flip_flap_item.dart';
 import 'package:flutter_flip_flap/widgets/core/back_out_curves.dart';
-import 'package:flutter_flip_flap/widgets/core/flap_animator.dart';
-import 'package:flutter_flip_flap/widgets/core/flap_controller_mixin.dart';
 import 'package:flutter_flip_flap/widgets/core/jitter_duration_mixin.dart';
 import 'package:flutter_flip_flap/widgets/core/unit_base.dart';
 import 'package:flutter_flip_flap/widgets/flap/unit_tile.dart';
 
-class FlapTextUnit extends FlapUnitBase {
-  FlapTextUnit({
+class FlipTextUnit extends FlipUnitBase {
+  FlipTextUnit({
     super.key,
-    this.unitsInPack = 1,
     required this.text,
     final List<String>? values,
+    this.displayType = UnitType.mixed,
+    this.unitsInPack = 1,
+    this.useShortestWay = true,
     super.duration,
     super.durationJitterMs,
-    this.useShortestWay = true,
-    super.textStyle,
+    this.textStyle,
     super.unitDecoration,
     required super.unitConstraints,
-    this.displayType = UnitType.mixed,
+    required super.flipAxis,
+    super.flipDirection = FlipDirection.forward,
     super.enableBounce,
     super.bounceOvershoot,
   }) : values = values ?? displayType.defValues;
@@ -29,52 +31,58 @@ class FlapTextUnit extends FlapUnitBase {
   final UnitType displayType;
   final int unitsInPack;
   final bool useShortestWay;
+  final TextStyle? textStyle;
 
   @override
-  State<FlapTextUnit> createState() => _FlapTextUnitState();
+  State<FlipTextUnit> createState() => _FlipTextUnitState();
 }
 
-class _FlapTextUnitState extends State<FlapTextUnit>
-    with TickerProviderStateMixin, JitterDurationMixin, FlapControllerMixin {
+class _FlipTextUnitState extends State<FlipTextUnit> with TickerProviderStateMixin, JitterDurationMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
   List<String> _values = <String>[];
   List<String> _plannedValues = <String>[];
   String _currentValue = '';
   int _currentPlannedIndex = 0;
 
-  String get nextValue => _plannedValues[nextIndex];
+  String get _targetValue => widget.text;
 
-  int get nextIndex {
+  String get _nextValue => _plannedValues[_nextIndex];
+
+  int get _nextIndex {
     final next = _currentPlannedIndex + 1;
     return next < _plannedValues.length ? next : 0;
   }
 
-  String get targetValue => widget.text;
-
   @override
   void initState() {
     super.initState();
-
     _values = widget.values;
-
-    if (!_values.contains(targetValue)) {
-      _values = List<String>.from(_values)..add(targetValue);
+    if (!_values.contains(_targetValue)) {
+      _values = List<String>.from(_values)..add(_targetValue);
     }
 
-    _currentValue = targetValue;
+    _currentValue = _targetValue;
     _currentPlannedIndex = 0;
     _plannedValues = <String>[_currentValue];
 
-    initFlapController(onStatus: _nextStep);
+    _controller = AnimationController(vsync: this, duration: _effectiveDuration)
+      ..addStatusListener(_handleStatus)
+      ..addListener(() => setState(() {}));
+    _animation = _buildAnimation();
   }
 
   @override
-  void didUpdateWidget(final FlapTextUnit oldWidget) {
+  void didUpdateWidget(covariant final FlipTextUnit oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.text != widget.text) {
+    final hasTextChanged = oldWidget.text != widget.text;
+
+    if (hasTextChanged) {
       _values = widget.values;
 
       final prevValue = oldWidget.text;
-      final nextTarget = targetValue;
+      final nextTarget = _targetValue;
 
       if (!_values.contains(prevValue)) {
         _values = List<String>.from(_values)..add(prevValue);
@@ -91,8 +99,8 @@ class _FlapTextUnitState extends State<FlapTextUnit>
         _plannedValues = <String>[nextTarget];
         _currentValue = nextTarget;
         _currentPlannedIndex = 0;
-        if (flapController.isAnimating) {
-          flapController.stop();
+        if (_controller.isAnimating) {
+          _controller.stop();
         }
         setState(() {});
         return;
@@ -105,70 +113,80 @@ class _FlapTextUnitState extends State<FlapTextUnit>
         unitsInPack: widget.unitsInPack,
         useShortestWay: widget.useShortestWay,
       );
-      if (!flapController.isAnimating) {
-        restartFlapAnimation();
-      }
+
+      _controller.duration = _effectiveDuration;
+      _animation = _buildAnimation();
+      _controller.stop();
+      _controller.forward(from: 0);
+    } else if (oldWidget.duration != widget.duration ||
+        oldWidget.durationJitterMs != widget.durationJitterMs ||
+        oldWidget.enableBounce != widget.enableBounce ||
+        oldWidget.bounceOvershoot != widget.bounceOvershoot) {
+      _controller.duration = _effectiveDuration;
+      _animation = _buildAnimation();
     }
   }
 
   @override
   void dispose() {
-    disposeFlapController();
+    _controller.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(final BuildContext context) {
-    final nextChar = nextValue;
-    final currentChar = _currentValue;
-    final nextFace = UnitTile(
-      text: nextChar,
-      constraints: widget.unitConstraints,
-      decoration: widget.unitDecoration,
-      textStyle: widget.textStyle,
-    );
-    final currentFace = UnitTile(
-      text: currentChar,
-      constraints: widget.unitConstraints,
-      decoration: widget.unitDecoration,
-      textStyle: widget.textStyle,
-    );
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: FlapAnimator(
-        currentFace: currentFace,
-        nextFace: nextFace,
-        animation: flapAnimation,
-        secondStage: flapSecondStage,
-      ),
-    );
-  }
+  Animation<double> _buildAnimation() => Tween<double>(begin: 0, end: 1)
+      .chain(
+        CurveTween(curve: widget.enableBounce ? BackOutCurve(overshoot: widget.bounceOvershoot) : Curves.easeInOut),
+      )
+      .animate(_controller);
 
-  void _nextStep(final AnimationStatus status) {
+  void _handleStatus(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
-      flapSecondStage = true;
-      final secondPhaseCurve = sharedSecondPhaseCurve(
-        hasChange: widget.enableBounce && nextValue == targetValue,
-        overshoot: widget.bounceOvershoot,
-      );
-      flapAnimation = buildFlapAnimation(curve: secondPhaseCurve);
-      flapController.reverse();
-    }
-    if (status == AnimationStatus.dismissed) {
-      _currentValue = nextValue;
-      _currentPlannedIndex = nextIndex;
-      flapSecondStage = false;
-      flapAnimation = buildFlapAnimation(curve: Curves.easeInCubic);
-      if (_currentValue != targetValue) {
-        restartFlapAnimation();
+      _currentValue = _nextValue;
+      _currentPlannedIndex = _nextIndex;
+      _controller.reset();
+      if (_currentValue != _targetValue) {
+        _controller.duration = _effectiveDuration;
+        _animation = _buildAnimation();
+        _controller.forward(from: 0);
+      } else {
+        setState(() {});
       }
     }
   }
 
-  Duration get _effectiveDuration => effectiveDuration(base: widget.duration, jitterMs: widget.durationJitterMs);
-
   @override
-  Duration get flapDuration => _effectiveDuration;
+  Widget build(final BuildContext context) {
+    final angle = _animation.value * pi * _directionSign;
+    final showFront = _animation.value <= 0.5;
+
+    final front = _UnitFace(
+      constraints: widget.unitConstraints,
+      decoration: widget.unitDecoration,
+      rotation: _rotationMatrix(angle),
+      visible: showFront,
+      text: _currentValue,
+      textStyle: widget.textStyle,
+    );
+
+    final back = _UnitFace(
+      constraints: widget.unitConstraints,
+      decoration: widget.unitDecoration,
+      rotation: _rotationMatrix(angle + pi),
+      visible: !showFront,
+      text: _nextValue,
+      textStyle: widget.textStyle,
+    );
+
+    return Stack(alignment: Alignment.center, children: [back, front]);
+  }
+
+  Matrix4 _rotationMatrix(final double angle) => widget.flipAxis == Axis.horizontal
+      ? (Matrix4.identity()
+          ..setEntry(3, 2, 0.002)
+          ..rotateY(angle))
+      : (Matrix4.identity()
+          ..setEntry(3, 2, 0.002)
+          ..rotateX(angle));
 
   List<String> _planSequence({
     required final List<String> values,
@@ -245,4 +263,36 @@ class _FlapTextUnitState extends State<FlapTextUnit>
     if (result.last != to) result[result.length - 1] = to;
     return result;
   }
+
+  Duration get _effectiveDuration => effectiveDuration(base: widget.duration, jitterMs: widget.durationJitterMs);
+
+  double get _directionSign => widget.flipDirection == FlipDirection.backward ? -1.0 : 1.0;
+}
+
+class _UnitFace extends StatelessWidget {
+  const _UnitFace({
+    required this.constraints,
+    required this.rotation,
+    required this.visible,
+    required this.text,
+    this.decoration,
+    this.textStyle,
+  });
+
+  final BoxConstraints constraints;
+  final Decoration? decoration;
+  final TextStyle? textStyle;
+  final String text;
+  final Matrix4 rotation;
+  final bool visible;
+
+  @override
+  Widget build(final BuildContext context) => Visibility(
+    visible: visible,
+    child: Transform(
+      alignment: Alignment.center,
+      transform: rotation,
+      child: UnitTile(text: text, constraints: constraints, decoration: decoration, textStyle: textStyle),
+    ),
+  );
 }

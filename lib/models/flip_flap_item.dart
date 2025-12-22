@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-enum ItemType { flap, flip}
+enum ItemType { flap, flip }
+
 enum FlipDirection { forward, backward }
+
 enum UnitType { character, number, special, mixed, text, widget }
 
 extension UnitTypeX on UnitType {
@@ -40,7 +42,7 @@ class FlipFlapTextItem extends FlipFlapItem {
     this.text, {
     this.unitType = UnitType.mixed,
     this.values,
-    this.cardsInPack = 2,
+    this.unitsInPack = 2,
     required super.type,
     super.flipAxis,
     super.flipDirection,
@@ -52,14 +54,14 @@ class FlipFlapTextItem extends FlipFlapItem {
     final String text, {
     final UnitType unitType = UnitType.mixed,
     final List<String>? values,
-    final int cardsInPack = 2,
+    final int unitsInPack = 2,
     final Duration? duration,
     final int? durationJitterMs,
   }) => FlipFlapTextItem._(
     text,
     unitType: unitType,
     values: values,
-    cardsInPack: cardsInPack,
+    unitsInPack: unitsInPack,
     type: ItemType.flap,
     duration: duration,
     durationJitterMs: durationJitterMs,
@@ -69,7 +71,7 @@ class FlipFlapTextItem extends FlipFlapItem {
     final String text, {
     final UnitType unitType = UnitType.mixed,
     final List<String>? values,
-    final int cardsInPack = 2,
+    final int unitsInPack = 2,
     required final Axis flipAxis,
     final FlipDirection flipDirection = FlipDirection.forward,
     final Duration? duration,
@@ -78,7 +80,7 @@ class FlipFlapTextItem extends FlipFlapItem {
     text,
     unitType: unitType,
     values: values,
-    cardsInPack: cardsInPack,
+    unitsInPack: unitsInPack,
     type: ItemType.flip,
     flipAxis: flipAxis,
     flipDirection: flipDirection,
@@ -89,7 +91,7 @@ class FlipFlapTextItem extends FlipFlapItem {
   final String text;
   final UnitType unitType;
   final List<String>? values;
-  final int cardsInPack;
+  final int unitsInPack;
 }
 
 class FlipFlapWidgetItem extends FlipFlapItem {

@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_flip_flap/widgets/core/back_out_curves.dart';
 import 'package:flutter_flip_flap/widgets/core/flap_animator.dart';
 import 'package:flutter_flip_flap/widgets/core/flap_controller_mixin.dart';
-import 'package:flutter_flip_flap/widgets/core/flap_curves.dart';
 import 'package:flutter_flip_flap/widgets/core/jitter_duration_mixin.dart';
+import 'package:flutter_flip_flap/widgets/core/unit_base.dart';
 
-class FlapWidgetUnit extends StatefulWidget {
+class FlapWidgetUnit extends FlapUnitBase {
   const FlapWidgetUnit({
     super.key,
-    required this.unitConstraints,
     required this.child,
-    this.unitDecoration,
-    this.duration = const Duration(milliseconds: 200),
-    this.durationJitterMs = 50,
-    this.textStyle,
+    required super.unitConstraints,
+    super.unitDecoration,
+    super.duration,
+    super.durationJitterMs,
+    super.textStyle,
+    super.enableBounce,
+    super.bounceOvershoot,
   });
 
-  final BoxConstraints unitConstraints;
-  final Decoration? unitDecoration;
   final Widget child;
-  final Duration duration;
-  final int durationJitterMs;
-  final TextStyle? textStyle;
 
   @override
   State<FlapWidgetUnit> createState() => _FlapWidgetUnitState();
@@ -28,7 +26,6 @@ class FlapWidgetUnit extends StatefulWidget {
 
 class _FlapWidgetUnitState extends State<FlapWidgetUnit>
     with TickerProviderStateMixin, JitterDurationMixin, FlapControllerMixin {
-
   late Widget _currentChild;
   late Widget _nextChild;
 
@@ -60,7 +57,11 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit>
   void _nextStep(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       flapSecondStage = true;
-      final secondPhaseCurve = flapSecondPhaseCurve(hasChange: _nextChild.hashCode != _currentChild.hashCode);
+      final hasChange = _nextChild.hashCode != _currentChild.hashCode;
+      final secondPhaseCurve = sharedSecondPhaseCurve(
+        hasChange: widget.enableBounce && hasChange,
+        overshoot: widget.bounceOvershoot,
+      );
       flapAnimation = buildFlapAnimation(curve: secondPhaseCurve);
       flapController.reverse();
     } else if (status == AnimationStatus.dismissed) {
@@ -71,10 +72,7 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit>
     }
   }
 
-  Duration get _effectiveDuration => effectiveDuration(
-    base: widget.duration,
-    jitterMs: widget.durationJitterMs,
-  );
+  Duration get _effectiveDuration => effectiveDuration(base: widget.duration, jitterMs: widget.durationJitterMs);
 
   @override
   Duration get flapDuration => _effectiveDuration;
@@ -86,11 +84,7 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit>
       decoration: widget.unitDecoration,
       child: _currentChild,
     ),
-    nextFace: _UnitFace(
-      constraints: widget.unitConstraints,
-      decoration: widget.unitDecoration,
-      child: _nextChild,
-    ),
+    nextFace: _UnitFace(constraints: widget.unitConstraints, decoration: widget.unitDecoration, child: _nextChild),
     animation: flapAnimation,
     secondStage: flapSecondStage,
   );
