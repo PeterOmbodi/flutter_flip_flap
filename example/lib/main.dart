@@ -90,10 +90,16 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
             text: formattedTime,
             textStyle: textStyle,
             unitConstraints: unitConstraints,
+            itemType: ItemType.flip,
+            unitDuration: Duration(milliseconds: 400),
+          ),
+          FlipFlapDisplay.fromText(
+            text: formattedTime,
+            textStyle: textStyle,
+            unitConstraints: unitConstraints,
             unitType: UnitType.text,
           ),
           FlipFlapDisplay(
-            textStyle: textStyle,
             items: [
               FlipFlapWidgetItem.flap(
                 child: Center(child: Text(randomEm, style: textStyle)),
@@ -133,7 +139,6 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
             unitConstraints: unitConstraints,
           ),
           FlipFlapDisplay(
-            textStyle: textStyle,
             items: [
               FlipFlapWidgetItem.flip(
                 child: Center(child: Text(randomEm, style: textStyle)),

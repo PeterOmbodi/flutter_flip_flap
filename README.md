@@ -57,7 +57,7 @@ Widget build(BuildContext context) {
     items: const [
       // Mechanical flap
       FlipFlapWidgetItem.flap(child: Icon(Icons.flight_takeoff, size: 48)),
-      FlipFlapTextItem.flap('A', unitType: UnitType.character, cardsInPack: 3),
+      FlipFlapTextItem.flap('A', unitType: UnitType.character, unitsInPack: 3),
       // 3D flip (horizontal axis, backward direction)
       FlipFlapWidgetItem.flip(
         child: Icon(Icons.swap_horiz, size: 48),
@@ -73,7 +73,7 @@ Widget build(BuildContext context) {
 
 ### Key parameters
 - `unitConstraints` - required card sizing (minWidth/minHeight).
-- `cardsInPack` - how many intermediate cards the animation scrolls (>=2 adds rolling effect).
+- `unitsInPack` - how many intermediate units the animation scrolls (>=2 adds rolling effect).
 - `unitType` / `values` - allowed symbols or custom list.
 - `useShortestWay` - pick shortest path on the circular alphabet or not.
 - `ItemType` / `flipAxis` / `flipDirection` - choose mechanical flap or 3D flip and its orientation.

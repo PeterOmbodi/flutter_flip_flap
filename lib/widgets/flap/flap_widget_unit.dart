@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_flip_flap/widgets/core/back_out_curves.dart';
 import 'package:flutter_flip_flap/widgets/core/flap_animator.dart';
 import 'package:flutter_flip_flap/widgets/core/flap_controller_mixin.dart';
-import 'package:flutter_flip_flap/widgets/core/flap_curves.dart';
 import 'package:flutter_flip_flap/widgets/core/jitter_duration_mixin.dart';
 
 class FlapWidgetUnit extends StatefulWidget {
   const FlapWidgetUnit({
     super.key,
-    required this.unitConstraints,
     required this.child,
+    required this.unitConstraints,
     this.unitDecoration,
     this.duration = const Duration(milliseconds: 200),
     this.durationJitterMs = 50,
     this.textStyle,
+    this.enableBounce = true,
+    this.bounceOvershoot = 2.8,
   });
 
   final BoxConstraints unitConstraints;
@@ -21,6 +23,8 @@ class FlapWidgetUnit extends StatefulWidget {
   final Duration duration;
   final int durationJitterMs;
   final TextStyle? textStyle;
+  final bool enableBounce;
+  final double bounceOvershoot;
 
   @override
   State<FlapWidgetUnit> createState() => _FlapWidgetUnitState();
@@ -60,7 +64,11 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit>
   void _nextStep(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       flapSecondStage = true;
-      final secondPhaseCurve = flapSecondPhaseCurve(hasChange: _nextChild.hashCode != _currentChild.hashCode);
+      final hasChange = _nextChild.hashCode != _currentChild.hashCode;
+      final secondPhaseCurve = sharedSecondPhaseCurve(
+        hasChange: widget.enableBounce && hasChange,
+        overshoot: widget.bounceOvershoot,
+      );
       flapAnimation = buildFlapAnimation(curve: secondPhaseCurve);
       flapController.reverse();
     } else if (status == AnimationStatus.dismissed) {
