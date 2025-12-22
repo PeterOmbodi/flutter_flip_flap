@@ -30,6 +30,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
   static final DateFormat _dayFormatter = DateFormat.EEEE();
   static final DateFormat _yearFormatter = DateFormat.y();
   static final DateFormat _dateFormatter = DateFormat('MMMM, d');
+  static final DateFormat _timeFormatter = DateFormat('HH:mm:ss');
   Timer? _timer;
   DateTime _dateTime = DateTime.now();
   late String _emoji;
@@ -38,21 +39,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
   void initState() {
     super.initState();
     _emoji = getRandomEmoji();
-    final now = DateTime.now();
-    final initialDelay = Duration(milliseconds: 1000 - now.millisecond);
-    _timer = Timer(initialDelay, () {
-      if (!mounted) return;
-      setState(() {
-        _dateTime = DateTime.now();
-        _emoji = getRandomEmoji();
-      });
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-        setState(() {
-          _dateTime = DateTime.now();
-          _emoji = getRandomEmoji();
-        });
-      });
-    });
+    _scheduleTick();
   }
 
   @override
@@ -61,9 +48,20 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
     super.dispose();
   }
 
-  static String _formatTime(final DateTime dt) {
-    String two(final int n) => n < 10 ? '0$n' : '$n';
-    return '${two(dt.hour)}:${two(dt.minute)}:${two(dt.second)}';
+  static String _formatTime(final DateTime dt) => _timeFormatter.format(dt);
+
+  void _scheduleTick() {
+    final now = DateTime.now();
+    final delay = Duration(milliseconds: 1000 - now.millisecond);
+    _timer?.cancel();
+    _timer = Timer(delay, () {
+      if (!mounted) return;
+      setState(() {
+        _dateTime = DateTime.now();
+        _emoji = getRandomEmoji();
+      });
+      _scheduleTick();
+    });
   }
 
   @override
