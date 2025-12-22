@@ -4,23 +4,24 @@ import 'package:flutter_flip_flap/widgets/core/back_out_curves.dart';
 import 'package:flutter_flip_flap/widgets/core/flap_animator.dart';
 import 'package:flutter_flip_flap/widgets/core/flap_controller_mixin.dart';
 import 'package:flutter_flip_flap/widgets/core/jitter_duration_mixin.dart';
+import 'package:flutter_flip_flap/widgets/core/unit_base.dart';
 import 'package:flutter_flip_flap/widgets/flap/unit_tile.dart';
 
-class FlapTextUnit extends StatefulWidget {
+class FlapTextUnit extends FlapUnitBase {
   FlapTextUnit({
     super.key,
     this.unitsInPack = 1,
     required this.text,
     final List<String>? values,
-    this.duration = const Duration(milliseconds: 200),
-    this.durationJitterMs = 50,
+    super.duration,
+    super.durationJitterMs,
     this.useShortestWay = true,
-    this.textStyle,
-    this.unitDecoration,
-    required this.unitConstraints,
+    super.textStyle,
+    super.unitDecoration,
+    required super.unitConstraints,
     this.displayType = UnitType.mixed,
-    this.enableBounce = true,
-    this.bounceOvershoot = 2.8,
+    super.enableBounce,
+    super.bounceOvershoot,
   }) : values = values ?? displayType.defValues;
 
   final String text;
@@ -28,13 +29,6 @@ class FlapTextUnit extends StatefulWidget {
   final UnitType displayType;
   final int unitsInPack;
   final bool useShortestWay;
-  final Duration duration;
-  final int durationJitterMs;
-  final TextStyle? textStyle;
-  final Decoration? unitDecoration;
-  final BoxConstraints unitConstraints;
-  final bool enableBounce;
-  final double bounceOvershoot;
 
   @override
   State<FlapTextUnit> createState() => _FlapTextUnitState();
@@ -42,7 +36,6 @@ class FlapTextUnit extends StatefulWidget {
 
 class _FlapTextUnitState extends State<FlapTextUnit>
     with TickerProviderStateMixin, JitterDurationMixin, FlapControllerMixin {
-
   List<String> _values = <String>[];
   List<String> _plannedValues = <String>[];
   String _currentValue = '';
@@ -172,10 +165,7 @@ class _FlapTextUnitState extends State<FlapTextUnit>
     }
   }
 
-  Duration get _effectiveDuration => effectiveDuration(
-    base: widget.duration,
-    jitterMs: widget.durationJitterMs,
-  );
+  Duration get _effectiveDuration => effectiveDuration(base: widget.duration, jitterMs: widget.durationJitterMs);
 
   @override
   Duration get flapDuration => _effectiveDuration;

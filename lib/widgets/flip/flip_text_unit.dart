@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_flip_flap/models/flip_flap_item.dart';
 import 'package:flutter_flip_flap/widgets/core/back_out_curves.dart';
 import 'package:flutter_flip_flap/widgets/core/jitter_duration_mixin.dart';
+import 'package:flutter_flip_flap/widgets/core/unit_base.dart';
 import 'package:flutter_flip_flap/widgets/flap/unit_tile.dart';
 
-class FlipTextUnit extends StatefulWidget {
+class FlipTextUnit extends FlipUnitBase {
   FlipTextUnit({
     super.key,
     required this.text,
@@ -14,15 +15,15 @@ class FlipTextUnit extends StatefulWidget {
     this.displayType = UnitType.mixed,
     this.unitsInPack = 1,
     this.useShortestWay = true,
-    this.duration = const Duration(milliseconds: 200),
-    this.durationJitterMs = 50,
+    super.duration,
+    super.durationJitterMs,
     this.textStyle,
-    this.unitDecoration,
-    required this.unitConstraints,
-    required this.flipAxis,
-    this.flipDirection = FlipDirection.forward,
-    this.enableBounce = true,
-    this.bounceOvershoot = 1.2,
+    super.unitDecoration,
+    required super.unitConstraints,
+    required super.flipAxis,
+    super.flipDirection = FlipDirection.forward,
+    super.enableBounce,
+    super.bounceOvershoot,
   }) : values = values ?? displayType.defValues;
 
   final String text;
@@ -30,15 +31,7 @@ class FlipTextUnit extends StatefulWidget {
   final UnitType displayType;
   final int unitsInPack;
   final bool useShortestWay;
-  final Duration duration;
-  final int durationJitterMs;
   final TextStyle? textStyle;
-  final Decoration? unitDecoration;
-  final BoxConstraints unitConstraints;
-  final Axis flipAxis;
-  final FlipDirection flipDirection;
-  final bool enableBounce;
-  final double bounceOvershoot;
 
   @override
   State<FlipTextUnit> createState() => _FlipTextUnitState();
@@ -142,9 +135,7 @@ class _FlipTextUnitState extends State<FlipTextUnit> with TickerProviderStateMix
 
   Animation<double> _buildAnimation() => Tween<double>(begin: 0, end: 1)
       .chain(
-        CurveTween(
-          curve: widget.enableBounce ? BackOutCurve(overshoot: widget.bounceOvershoot) : Curves.easeInOut,
-        ),
+        CurveTween(curve: widget.enableBounce ? BackOutCurve(overshoot: widget.bounceOvershoot) : Curves.easeInOut),
       )
       .animate(_controller);
 
@@ -190,8 +181,12 @@ class _FlipTextUnitState extends State<FlipTextUnit> with TickerProviderStateMix
   }
 
   Matrix4 _rotationMatrix(final double angle) => widget.flipAxis == Axis.horizontal
-      ? (Matrix4.identity()..setEntry(3, 2, 0.002)..rotateY(angle))
-      : (Matrix4.identity()..setEntry(3, 2, 0.002)..rotateX(angle));
+      ? (Matrix4.identity()
+          ..setEntry(3, 2, 0.002)
+          ..rotateY(angle))
+      : (Matrix4.identity()
+          ..setEntry(3, 2, 0.002)
+          ..rotateX(angle));
 
   List<String> _planSequence({
     required final List<String> values,
@@ -269,10 +264,7 @@ class _FlipTextUnitState extends State<FlipTextUnit> with TickerProviderStateMix
     return result;
   }
 
-  Duration get _effectiveDuration => effectiveDuration(
-    base: widget.duration,
-    jitterMs: widget.durationJitterMs,
-  );
+  Duration get _effectiveDuration => effectiveDuration(base: widget.duration, jitterMs: widget.durationJitterMs);
 
   double get _directionSign => widget.flipDirection == FlipDirection.backward ? -1.0 : 1.0;
 }
@@ -300,12 +292,7 @@ class _UnitFace extends StatelessWidget {
     child: Transform(
       alignment: Alignment.center,
       transform: rotation,
-      child: UnitTile(
-        text: text,
-        constraints: constraints,
-        decoration: decoration,
-        textStyle: textStyle,
-      ),
+      child: UnitTile(text: text, constraints: constraints, decoration: decoration, textStyle: textStyle),
     ),
   );
 }

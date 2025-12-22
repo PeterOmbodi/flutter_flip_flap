@@ -2,7 +2,7 @@ name: flutter_flip_flap
 description: >
   A customizable split-flap and flip-style display widget for Flutter — 
   supports both mechanical "flap" and 3D "flip" animations.
-version: 0.3.0
+version: 0.4.0
 repository: https://github.com/PeterOmbodi/flutter_flip_flap
 homepage: https://pub.dev/packages/flutter_flip_flap
 issue_tracker: https://github.com/PeterOmbodi/flutter_flip_flap/issues

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-enum ItemType { flap, flip}
+enum ItemType { flap, flip }
+
 enum FlipDirection { forward, backward }
+
 enum UnitType { character, number, special, mixed, text, widget }
 
 extension UnitTypeX on UnitType {

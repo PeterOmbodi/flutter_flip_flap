@@ -76,16 +76,20 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
     final year = DateFormat.y().format(_dateTime);
     final date = DateFormat('MMMM, d').format(_dateTime);
 
-    final isOdd = int.parse(secondsText) % 2 == 1;
+    final isOdd = _dateTime.second.isOdd;
+
     final randomEm = getRandomEmoji();
+    final labelStyle = Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white70);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding / 2),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 8,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 24),
         children: [
+          Text('Flap text', style: labelStyle),
           FlipFlapDisplay.fromText(text: formattedTime, textStyle: textStyle, unitConstraints: unitConstraints),
+          const SizedBox(height: 12),
+          Text('Flip text', style: labelStyle),
           FlipFlapDisplay.fromText(
             text: formattedTime,
             textStyle: textStyle,
@@ -93,12 +97,16 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
             itemType: ItemType.flip,
             unitDuration: Duration(milliseconds: 400),
           ),
+          const SizedBox(height: 12),
+          Text('Full text without alphabet limits', style: labelStyle),
           FlipFlapDisplay.fromText(
             text: formattedTime,
             textStyle: textStyle,
             unitConstraints: unitConstraints,
             unitType: UnitType.text,
           ),
+          const SizedBox(height: 12),
+          Text('Flap widgets + text', style: labelStyle),
           FlipFlapDisplay(
             items: [
               FlipFlapWidgetItem.flap(
@@ -138,6 +146,8 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
             ],
             unitConstraints: unitConstraints,
           ),
+          const SizedBox(height: 12),
+          Text('Flip widgets + text', style: labelStyle),
           FlipFlapDisplay(
             items: [
               FlipFlapWidgetItem.flip(
@@ -186,6 +196,44 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
               ),
             ],
             unitConstraints: unitConstraints,
+          ),
+          Text('Flap text + unitsInPack: 5', style: labelStyle),
+          Builder(
+            builder: (context) {
+              final isOneEighth = (_dateTime.second ~/ 8).isOdd;
+              final text = isOneEighth ? 'Time- $formattedTime' : date;
+              return FlipFlapDisplay.fromText(
+                text: text.padRight(text.length + (16 - text.length) ~/ 2, ' ').padLeft(16, ' '),
+                textStyle: textStyle.copyWith(fontSize: fontSize / 2.3),
+                unitConstraints: unitConstraints.copyWith(
+                  maxHeight: unitConstraints.maxHeight / 2,
+                  minHeight: unitConstraints.maxHeight / 2,
+                  minWidth: unitConstraints.minWidth / 2,
+                  maxWidth: unitConstraints.minWidth / 2,
+                ),
+                unitsInPack: 5,
+              );
+            }
+          ),
+          Text('Flip text + unitsInPack: 4', style: labelStyle),
+          Builder(
+              builder: (context) {
+                final isOneEighth = ((_dateTime.second + 4) ~/ 8).isOdd;
+                final text = isOneEighth ? dayName : year;
+                return FlipFlapDisplay.fromText(
+                  text: text.padRight(text.length + (16 - text.length) ~/ 2, ' ').padLeft(16, ' '),
+                  textStyle: textStyle.copyWith(fontSize: fontSize / 2.3),
+                  itemType: ItemType.flip,
+                  unitConstraints: unitConstraints.copyWith(
+                    maxHeight: unitConstraints.maxHeight / 2,
+                    minHeight: unitConstraints.maxHeight / 2,
+                    minWidth: unitConstraints.minWidth / 2,
+                    maxWidth: unitConstraints.minWidth / 2,
+                  ),
+                  unitDuration: Duration(milliseconds: 600),
+                  unitsInPack: 4,
+                );
+              }
           ),
         ],
       ),

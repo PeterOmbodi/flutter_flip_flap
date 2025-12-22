@@ -66,6 +66,13 @@ Widget build(BuildContext context) {
       ),
       // Not limited by alphabet
       FlipFlapTextItem.flap('12', unitType: UnitType.text),
+      // 3D flip for text (vertical axis)
+      FlipFlapTextItem.flip(
+        'B',
+        unitType: UnitType.character,
+        unitsInPack: 2,
+        flipAxis: Axis.vertical,
+      ),
     ],
   );
 }
@@ -76,9 +83,10 @@ Widget build(BuildContext context) {
 - `unitsInPack` - how many intermediate units the animation scrolls (>=2 adds rolling effect).
 - `unitType` / `values` - allowed symbols or custom list.
 - `useShortestWay` - pick shortest path on the circular alphabet or not.
-- `ItemType` / `flipAxis` / `flipDirection` - choose mechanical flap or 3D flip and its orientation.
+- `ItemType` / `flipAxis` / `flipDirection` - choose mechanical flap or 3D flip and its orientation (works in factory `FlipFlapDisplay.fromText` too).
 - `duration` / `durationJitterMs` - per item or per display animation timing.
 - `displayDecoration` / `unitDecoration` / `textStyle` - per-widget styling or via theme.
+- `enableBounce` / `bounceOvershoot` - toggle/adjust back-out overshoot for flap/flip animations.
 
 ### Theming
 Add `FlipFlapTheme` to `ThemeData.extensions` to reuse styles:

@@ -69,81 +69,62 @@ class FlipFlapDisplay extends StatelessWidget {
       decoration: displayDecoration ?? theme.displayDecoration,
       child: Row(
         mainAxisAlignment: mainAxisAlignment,
-        children: [
-          for (int i = 0; i < items.length; i++) _buildUnit(items[i], theme, i),
-        ],
+        children: [for (int i = 0; i < items.length; i++) _buildUnit(items[i], theme, i)],
       ),
     );
   }
 
-  Widget _buildUnit(
-    final FlipFlapItem item,
-    final FlipFlapTheme theme,
-    final int index,
-  ) => switch (item) {
-    FlipFlapTextItem(
-      :final text,
-      :final unitType,
-      :final values,
-      :final unitsInPack,
-      :final type,
-    ) =>
-      switch (type) {
-        ItemType.flap => FlapTextUnit(
-          key: Key('ff-text-$index-$key'),
-          text: text,
-          values: values,
-          displayType: unitType,
-          unitsInPack: unitsInPack,
-          duration: _resolveDuration(item.duration),
-          durationJitterMs: _resolveJitter(item.durationJitterMs),
-          unitConstraints: unitConstraints,
-          textStyle: textStyle ?? theme.textStyle,
-          unitDecoration: unitDecoration ?? theme.unitDecoration,
-          useShortestWay: useShortestWay,
-        ),
-        ItemType.flip => FlipTextUnit(
-          key: Key('ff-text-$index-$key'),
-          text: text,
-          values: values,
-          displayType: unitType,
-          unitsInPack: unitsInPack,
-          duration: _resolveDuration(item.duration),
-          durationJitterMs: _resolveJitter(item.durationJitterMs),
-          unitConstraints: unitConstraints,
-          textStyle: textStyle ?? theme.textStyle,
-          unitDecoration: unitDecoration ?? theme.unitDecoration,
-          useShortestWay: useShortestWay,
-          flipAxis: item.flipAxis ?? Axis.horizontal,
-          flipDirection: item.flipDirection ?? FlipDirection.forward,
-        ),
-      },
-    FlipFlapWidgetItem(
-      :final key,
-      :final child,
-      :final constraints,
-      :final type,
-    ) =>
-      switch (type) {
-        ItemType.flap => FlapWidgetUnit(
-          key: key ?? child.key,
-          unitConstraints: constraints ?? unitConstraints,
-          unitDecoration: unitDecoration ?? theme.unitDecoration,
-          duration: _resolveDuration(item.duration),
-          durationJitterMs: _resolveJitter(item.durationJitterMs),
-          child: child,
-        ),
-        ItemType.flip => FlipWidgetUnit(
-          key: key ?? child.key,
-          unitConstraints: constraints ?? unitConstraints,
-          unitDecoration: unitDecoration ?? theme.unitDecoration,
-          duration: _resolveDuration(item.duration),
-          durationJitterMs: _resolveJitter(item.durationJitterMs),
-          flipAxis: item.flipAxis ?? Axis.horizontal,
-          flipDirection: item.flipDirection ?? FlipDirection.forward,
-          child: child,
-        ),
-      },
+  Widget _buildUnit(final FlipFlapItem item, final FlipFlapTheme theme, final int index) => switch (item) {
+    FlipFlapTextItem(:final text, :final unitType, :final values, :final unitsInPack, :final type) => switch (type) {
+      ItemType.flap => FlapTextUnit(
+        key: Key('ff-text-$index-$key'),
+        text: text,
+        values: values,
+        displayType: unitType,
+        unitsInPack: unitsInPack,
+        duration: _resolveDuration(item.duration),
+        durationJitterMs: _resolveJitter(item.durationJitterMs),
+        unitConstraints: unitConstraints,
+        textStyle: textStyle ?? theme.textStyle,
+        unitDecoration: unitDecoration ?? theme.unitDecoration,
+        useShortestWay: useShortestWay,
+      ),
+      ItemType.flip => FlipTextUnit(
+        key: Key('ff-text-$index-$key'),
+        text: text,
+        values: values,
+        displayType: unitType,
+        unitsInPack: unitsInPack,
+        duration: _resolveDuration(item.duration),
+        durationJitterMs: _resolveJitter(item.durationJitterMs),
+        unitConstraints: unitConstraints,
+        textStyle: textStyle ?? theme.textStyle,
+        unitDecoration: unitDecoration ?? theme.unitDecoration,
+        useShortestWay: useShortestWay,
+        flipAxis: item.flipAxis ?? Axis.horizontal,
+        flipDirection: item.flipDirection ?? FlipDirection.forward,
+      ),
+    },
+    FlipFlapWidgetItem(:final key, :final child, :final constraints, :final type) => switch (type) {
+      ItemType.flap => FlapWidgetUnit(
+        key: key ?? child.key,
+        unitConstraints: constraints ?? unitConstraints,
+        unitDecoration: unitDecoration ?? theme.unitDecoration,
+        duration: _resolveDuration(item.duration),
+        durationJitterMs: _resolveJitter(item.durationJitterMs),
+        child: child,
+      ),
+      ItemType.flip => FlipWidgetUnit(
+        key: key ?? child.key,
+        unitConstraints: constraints ?? unitConstraints,
+        unitDecoration: unitDecoration ?? theme.unitDecoration,
+        duration: _resolveDuration(item.duration),
+        durationJitterMs: _resolveJitter(item.durationJitterMs),
+        flipAxis: item.flipAxis ?? Axis.horizontal,
+        flipDirection: item.flipDirection ?? FlipDirection.forward,
+        child: child,
+      ),
+    },
   };
 
   static List<FlipFlapItem> _itemsFromText({
@@ -154,9 +135,7 @@ class FlipFlapDisplay extends StatelessWidget {
     required final int? durationJitterMs,
     required final ItemType itemType,
   }) {
-    final chars = unitType == UnitType.text
-        ? <String>[text]
-        : text.characters.toList();
+    final chars = unitType == UnitType.text ? <String>[text] : text.characters.toList();
     return chars
         .map(
           (final e) => switch (itemType) {
@@ -183,6 +162,5 @@ class FlipFlapDisplay extends StatelessWidget {
   Duration _resolveDuration(final Duration? itemDuration) =>
       itemDuration ?? unitDuration ?? const Duration(milliseconds: 200);
 
-  int _resolveJitter(final int? itemJitter) =>
-      itemJitter ?? unitDurationJitterMs ?? 50;
+  int _resolveJitter(final int? itemJitter) => itemJitter ?? unitDurationJitterMs ?? 50;
 }
