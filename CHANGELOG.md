@@ -16,7 +16,7 @@
 - Used flapped widget in example
 
 ## 0.2.1
-- Added link to web live demo in read.me
+- Added link to web live demo in README
 
 ## 0.2.2
 - Refactored code
@@ -32,3 +32,6 @@
 - Exposed bounce controls (enableBounce/bounceOvershoot) for flap and flip units
 - Moved FlipFlapDisplay to widgets root (kept export), added itemType to fromText
 - Updated README with flip text example and new params
+
+## 0.4.1
+- Fixed CHANGELOG
