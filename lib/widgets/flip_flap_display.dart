@@ -77,12 +77,12 @@ class FlipFlapDisplay extends StatelessWidget {
   Widget _buildUnit(final FlipFlapItem item, final FlipFlapTheme theme, final int index) => switch (item) {
     FlipFlapTextItem(:final text, :final unitType, :final values, :final unitsInPack, :final type) => switch (type) {
       ItemType.flap => FlapTextUnit(
-        key: Key('ff-text-$index-$key'),
+        key: Key('FlapTextUnit-$index-$key'),
         text: text,
         values: values,
         displayType: unitType,
         unitsInPack: unitsInPack,
-        duration: _resolveDuration(item.duration),
+        duration: item.duration ?? unitDuration ?? const Duration(milliseconds: 400),
         durationJitterMs: _resolveJitter(item.durationJitterMs),
         unitConstraints: unitConstraints,
         textStyle: textStyle ?? theme.textStyle,
@@ -90,12 +90,12 @@ class FlipFlapDisplay extends StatelessWidget {
         useShortestWay: useShortestWay,
       ),
       ItemType.flip => FlipTextUnit(
-        key: Key('ff-text-$index-$key'),
+        key: Key('FlipTextUnit-$index-$key'),
         text: text,
         values: values,
         displayType: unitType,
         unitsInPack: unitsInPack,
-        duration: _resolveDuration(item.duration),
+        duration: item.duration ?? unitDuration ?? const Duration(milliseconds: 800),
         durationJitterMs: _resolveJitter(item.durationJitterMs),
         unitConstraints: unitConstraints,
         textStyle: textStyle ?? theme.textStyle,
@@ -105,26 +105,29 @@ class FlipFlapDisplay extends StatelessWidget {
         flipDirection: item.flipDirection ?? FlipDirection.forward,
       ),
     },
-    FlipFlapWidgetItem(:final key, :final child, :final constraints, :final type) => switch (type) {
-      ItemType.flap => FlapWidgetUnit(
-        key: key ?? child.key,
-        unitConstraints: constraints ?? unitConstraints,
-        unitDecoration: unitDecoration ?? theme.unitDecoration,
-        duration: _resolveDuration(item.duration),
-        durationJitterMs: _resolveJitter(item.durationJitterMs),
-        child: child,
-      ),
-      ItemType.flip => FlipWidgetUnit(
-        key: key ?? child.key,
-        unitConstraints: constraints ?? unitConstraints,
-        unitDecoration: unitDecoration ?? theme.unitDecoration,
-        duration: _resolveDuration(item.duration),
-        durationJitterMs: _resolveJitter(item.durationJitterMs),
-        flipAxis: item.flipAxis ?? Axis.horizontal,
-        flipDirection: item.flipDirection ?? FlipDirection.forward,
-        child: child,
-      ),
-    },
+    FlipFlapWidgetItem(:final key, :final child, :final constraints, :final type, :final animationTrigger) =>
+      switch (type) {
+        ItemType.flap => FlapWidgetUnit(
+          key: Key('FlapWidgetUnit-$index-$key'),
+          unitConstraints: constraints ?? unitConstraints,
+          unitDecoration: unitDecoration ?? theme.unitDecoration,
+          duration: item.duration ?? unitDuration ?? const Duration(milliseconds: 400),
+          durationJitterMs: _resolveJitter(item.durationJitterMs),
+          animationTrigger: animationTrigger,
+          child: child,
+        ),
+        ItemType.flip => FlipWidgetUnit(
+          key: Key('FlipWidgetUnit-$index-$key'),
+          unitConstraints: constraints ?? unitConstraints,
+          unitDecoration: unitDecoration ?? theme.unitDecoration,
+          duration: item.duration ?? unitDuration ?? const Duration(milliseconds: 800),
+          durationJitterMs: _resolveJitter(item.durationJitterMs),
+          flipAxis: item.flipAxis ?? Axis.horizontal,
+          flipDirection: item.flipDirection ?? FlipDirection.forward,
+          animationTrigger: animationTrigger,
+          child: child,
+        ),
+      },
   };
 
   static List<FlipFlapItem> _itemsFromText({
@@ -158,9 +161,6 @@ class FlipFlapDisplay extends StatelessWidget {
         )
         .toList();
   }
-
-  Duration _resolveDuration(final Duration? itemDuration) =>
-      itemDuration ?? unitDuration ?? const Duration(milliseconds: 200);
 
   int _resolveJitter(final int? itemJitter) => itemJitter ?? unitDurationJitterMs ?? 50;
 }

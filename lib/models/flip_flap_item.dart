@@ -99,6 +99,7 @@ class FlipFlapWidgetItem extends FlipFlapItem {
     this.key,
     required this.child,
     this.constraints,
+    this.animationTrigger,
     required super.type,
     super.flipAxis,
     super.flipDirection,
@@ -110,12 +111,14 @@ class FlipFlapWidgetItem extends FlipFlapItem {
     final Key? key,
     required final Widget child,
     final BoxConstraints? constraints,
+    final Object? animationTrigger,
     final Duration? duration,
     final int? durationJitterMs,
   }) => FlipFlapWidgetItem._(
     key: key,
     child: child,
     constraints: constraints,
+    animationTrigger: animationTrigger,
     type: ItemType.flap,
     duration: duration,
     durationJitterMs: durationJitterMs,
@@ -127,12 +130,14 @@ class FlipFlapWidgetItem extends FlipFlapItem {
     final BoxConstraints? constraints,
     required final Axis flipAxis,
     final FlipDirection flipDirection = FlipDirection.forward,
+    final Object? animationTrigger,
     final Duration? duration,
     final int? durationJitterMs,
   }) => FlipFlapWidgetItem._(
     key: key,
     child: child,
     constraints: constraints,
+    animationTrigger: animationTrigger,
     type: ItemType.flip,
     flipAxis: flipAxis,
     flipDirection: flipDirection,
@@ -143,4 +148,5 @@ class FlipFlapWidgetItem extends FlipFlapItem {
   final Key? key;
   final Widget child;
   final BoxConstraints? constraints;
+  final Object? animationTrigger;
 }

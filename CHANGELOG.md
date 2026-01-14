@@ -35,3 +35,8 @@
 
 ## 0.4.1
 - Fixed CHANGELOG
+
+## 0.4.2
+- Added explicit animationTrigger for widget units (flap/flip) and item model
+- Set default duration - flip: 800ms, flap: 400ms
+- Updated example
