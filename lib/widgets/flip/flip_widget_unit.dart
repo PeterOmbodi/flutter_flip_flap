@@ -19,10 +19,12 @@ class FlipWidgetUnit extends FlipUnitBase {
     super.enableBounce,
     super.bounceOvershoot,
     this.animationTrigger,
+    this.onAnimationComplete,
   });
 
   final Widget child;
   final Object? animationTrigger;
+  final VoidCallback? onAnimationComplete;
 
   @override
   State<FlipWidgetUnit> createState() => _FlipWidgetUnitState();
@@ -111,6 +113,7 @@ class _FlipWidgetUnitState extends State<FlipWidgetUnit> with TickerProviderStat
     if (status == AnimationStatus.completed) {
       _currentChild = _nextChild;
       _controller.reset();
+      widget.onAnimationComplete?.call();
     }
   }
 

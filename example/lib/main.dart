@@ -105,7 +105,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
             textStyle: layout.textStyle,
             unitConstraints: layout.unitConstraints,
             itemType: ItemType.flip,
-            unitDuration: const Duration(milliseconds: 400),
+            unitDuration: const Duration(milliseconds: 600),
           ),
           const SizedBox(height: 12),
           Text('Full text without alphabet limits', style: labelStyle),
@@ -174,7 +174,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
             ],
             unitConstraints: layout.unitConstraints,
           ),
-          Text('Flap text + unitsInPack: 5', style: labelStyle),
+          Text('Flap text and 5 unitsInPack', style: labelStyle),
           Builder(
             builder: (context) {
               final text = time.isEighthTick ? 'Time- ${time.formattedTime}' : time.date;
@@ -183,6 +183,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
                 textStyle: layout.smallTextStyle,
                 unitConstraints: _smallUnitConstraints(layout.unitConstraints),
                 unitsInPack: 5,
+                onItemsAnimationComplete: () => debugPrint('Flap text and 5 unitsInPack: $text'),
               );
             },
           ),
@@ -197,6 +198,7 @@ class _FlipFlapClockState extends State<FlipFlapClock> {
                 unitConstraints: _smallUnitConstraints(layout.unitConstraints),
                 unitDuration: const Duration(milliseconds: 600),
                 unitsInPack: 4,
+                onItemsAnimationComplete: () => debugPrint('Flip text and 4 unitsInPack: $text'),
               );
             },
           ),

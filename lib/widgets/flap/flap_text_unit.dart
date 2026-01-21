@@ -22,6 +22,7 @@ class FlapTextUnit extends FlapUnitBase {
     this.displayType = UnitType.mixed,
     super.enableBounce,
     super.bounceOvershoot,
+    this.onAnimationComplete,
   }) : values = values ?? displayType.defValues;
 
   final String text;
@@ -29,6 +30,7 @@ class FlapTextUnit extends FlapUnitBase {
   final UnitType displayType;
   final int unitsInPack;
   final bool useShortestWay;
+  final VoidCallback? onAnimationComplete;
 
   @override
   State<FlapTextUnit> createState() => _FlapTextUnitState();
@@ -95,6 +97,7 @@ class _FlapTextUnitState extends State<FlapTextUnit>
           flapController.stop();
         }
         setState(() {});
+        widget.onAnimationComplete?.call();
         return;
       }
 
@@ -161,6 +164,8 @@ class _FlapTextUnitState extends State<FlapTextUnit>
       flapAnimation = buildFlapAnimation(curve: Curves.easeInCubic);
       if (_currentValue != targetValue) {
         restartFlapAnimation();
+      } else {
+        widget.onAnimationComplete?.call();
       }
     }
   }
