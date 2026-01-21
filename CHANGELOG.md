@@ -40,3 +40,6 @@
 - Added explicit animationTrigger for widget units (flap/flip) and item model
 - Set default duration - flip: 800ms, flap: 400ms
 - Updated example
+
+## 0.5.0
+- Added `onItemsAnimationComplete` callback on `FlipFlapDisplay` (fires after the last started item animation completes)

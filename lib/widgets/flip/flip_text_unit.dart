@@ -24,6 +24,7 @@ class FlipTextUnit extends FlipUnitBase {
     super.flipDirection = FlipDirection.forward,
     super.enableBounce,
     super.bounceOvershoot,
+    this.onAnimationComplete,
   }) : values = values ?? displayType.defValues;
 
   final String text;
@@ -32,6 +33,7 @@ class FlipTextUnit extends FlipUnitBase {
   final int unitsInPack;
   final bool useShortestWay;
   final TextStyle? textStyle;
+  final VoidCallback? onAnimationComplete;
 
   @override
   State<FlipTextUnit> createState() => _FlipTextUnitState();
@@ -103,6 +105,7 @@ class _FlipTextUnitState extends State<FlipTextUnit> with TickerProviderStateMix
           _controller.stop();
         }
         setState(() {});
+        widget.onAnimationComplete?.call();
         return;
       }
 
@@ -150,6 +153,7 @@ class _FlipTextUnitState extends State<FlipTextUnit> with TickerProviderStateMix
         _controller.forward(from: 0);
       } else {
         setState(() {});
+        widget.onAnimationComplete?.call();
       }
     }
   }

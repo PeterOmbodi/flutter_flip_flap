@@ -17,10 +17,12 @@ class FlapWidgetUnit extends FlapUnitBase {
     super.enableBounce,
     super.bounceOvershoot,
     this.animationTrigger,
+    this.onAnimationComplete,
   });
 
   final Widget child;
   final Object? animationTrigger;
+  final VoidCallback? onAnimationComplete;
 
   @override
   State<FlapWidgetUnit> createState() => _FlapWidgetUnitState();
@@ -75,6 +77,7 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit>
       flapSecondStage = false;
       if (!mounted) return;
       setState(() {});
+      widget.onAnimationComplete?.call();
     }
   }
 

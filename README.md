@@ -17,7 +17,7 @@ flutter pub add flutter_flip_flap
 or add to `pubspec.yaml`:
 ```yaml
 dependencies:
-  flutter_flip_flap: ^0.4.2
+  flutter_flip_flap: ^0.5.0
 ```
 
 ## Quick start
@@ -79,14 +79,20 @@ Widget build(BuildContext context) {
 ```
 
 ### Key parameters
+- `items` - list of `FlipFlapTextItem` / `FlipFlapWidgetItem` displayed in order.
 - `unitConstraints` - required card sizing (minWidth/minHeight).
+- `mainAxisAlignment` - alignment for the row of units.
+- `unitDuration` / `unitDurationJitterMs` - display-level fallback timing (items can override).
 - `unitsInPack` - how many intermediate units the animation scrolls (>=2 adds rolling effect).
-- `unitType` / `values` - allowed symbols or custom list.
+- `unitType` / `values` - allowed symbols or custom list for text items.
 - `useShortestWay` - pick shortest path on the circular alphabet or not.
 - `ItemType` / `flipAxis` / `flipDirection` - choose mechanical flap or 3D flip and its orientation (works in factory `FlipFlapDisplay.fromText` too).
-- `duration` / `durationJitterMs` - per item or per display animation timing.
+- `duration` / `durationJitterMs` - per item timing override (text and widget items).
 - `displayDecoration` / `unitDecoration` / `textStyle` - per-widget styling or via theme.
-- `enableBounce` / `bounceOvershoot` - toggle/adjust back-out overshoot for flap/flip animations.
+- `constraints` - per widget item override for `unitConstraints`.
+- `animationTrigger` - for widget items, set to a stable non-null value to force animation on changes; keep it consistently null or non-null per item index.
+- `onItemsAnimationComplete` - fires when the last started item animation completes (useful with `fromText` + `unitsInPack`).
+- `enableBounce` / `bounceOvershoot` - available on low-level `FlapTextUnit` / `FlipTextUnit` if you build units directly.
 
 ### Theming
 Add `FlipFlapTheme` to `ThemeData.extensions` to reuse styles:
