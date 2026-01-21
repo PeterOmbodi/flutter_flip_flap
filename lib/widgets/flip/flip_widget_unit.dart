@@ -18,9 +18,11 @@ class FlipWidgetUnit extends FlipUnitBase {
     super.durationJitterMs,
     super.enableBounce,
     super.bounceOvershoot,
+    this.animationTrigger,
   });
 
   final Widget child;
+  final Object? animationTrigger;
 
   @override
   State<FlipWidgetUnit> createState() => _FlipWidgetUnitState();
@@ -47,7 +49,11 @@ class _FlipWidgetUnitState extends State<FlipWidgetUnit> with TickerProviderStat
   @override
   void didUpdateWidget(covariant final FlipWidgetUnit oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.child, widget.child)) {
+    final shouldAnimate = widget.animationTrigger != null
+        ? oldWidget.animationTrigger != widget.animationTrigger
+        : oldWidget.child.key != widget.child.key ||
+            (oldWidget.child.key == null && !identical(oldWidget.child, widget.child));
+    if (shouldAnimate) {
       _nextChild = widget.child;
       if (!_controller.isAnimating) {
         _controller.duration = _effectiveDuration;

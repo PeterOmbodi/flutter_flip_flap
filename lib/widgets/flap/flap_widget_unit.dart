@@ -16,9 +16,11 @@ class FlapWidgetUnit extends FlapUnitBase {
     super.textStyle,
     super.enableBounce,
     super.bounceOvershoot,
+    this.animationTrigger,
   });
 
   final Widget child;
+  final Object? animationTrigger;
 
   @override
   State<FlapWidgetUnit> createState() => _FlapWidgetUnitState();
@@ -40,7 +42,11 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit>
   @override
   void didUpdateWidget(covariant final FlapWidgetUnit oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.child, widget.child)) {
+    final shouldAnimate = widget.animationTrigger != null
+        ? oldWidget.animationTrigger != widget.animationTrigger
+        : oldWidget.child.key != widget.child.key ||
+            (oldWidget.child.key == null && !identical(oldWidget.child, widget.child));
+    if (shouldAnimate) {
       _nextChild = widget.child;
       if (!flapController.isAnimating) {
         restartFlapAnimation();

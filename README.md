@@ -17,7 +17,7 @@ flutter pub add flutter_flip_flap
 or add to `pubspec.yaml`:
 ```yaml
 dependencies:
-  flutter_flip_flap: ^0.4.1
+  flutter_flip_flap: ^0.4.2
 ```
 
 ## Quick start
