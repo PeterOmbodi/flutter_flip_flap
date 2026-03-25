@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
 class UnitTile extends StatelessWidget {
-  const UnitTile({
-    super.key,
-    required this.text,
-    required this.constraints,
-    this.textStyle,
-    this.decoration,
-  });
+  const UnitTile({super.key, required this.text, required this.constraints, this.textStyle, this.decoration});
 
   final String text;
   final TextStyle? textStyle;
@@ -24,19 +18,10 @@ class UnitTile extends StatelessWidget {
             decoration ??
             BoxDecoration(
               color: Theme.of(context).primaryColor,
-              border: Border.all(
-                color:
-                    textStyle?.color ??
-                    Theme.of(context).textTheme.bodyLarge!.color!,
-              ),
+              border: Border.all(color: textStyle?.color ?? Theme.of(context).textTheme.bodyLarge!.color!),
               borderRadius: BorderRadius.all(Radius.circular(8)),
             ),
-        child: Center(
-          child: Text(
-            text,
-            style: textStyle ?? Theme.of(context).textTheme.bodyLarge,
-          ),
-        ),
+        child: Center(child: Text(text, style: textStyle ?? Theme.of(context).textTheme.bodyLarge)),
       ),
     ),
   );
