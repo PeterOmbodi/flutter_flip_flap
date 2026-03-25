@@ -47,7 +47,7 @@ class _FlapWidgetUnitState extends State<FlapWidgetUnit>
     final shouldAnimate = widget.animationTrigger != null
         ? oldWidget.animationTrigger != widget.animationTrigger
         : oldWidget.child.key != widget.child.key ||
-            (oldWidget.child.key == null && !identical(oldWidget.child, widget.child));
+              (oldWidget.child.key == null && !identical(oldWidget.child, widget.child));
     if (shouldAnimate) {
       _nextChild = widget.child;
       if (!flapController.isAnimating) {

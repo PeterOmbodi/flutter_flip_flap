@@ -100,7 +100,6 @@ class FlipFlapDisplay extends StatefulWidget {
         )
         .toList();
   }
-
 }
 
 class _FlipFlapDisplayState extends State<FlipFlapDisplay> {
@@ -129,62 +128,62 @@ class _FlipFlapDisplayState extends State<FlipFlapDisplay> {
     final onComplete = widget.onItemsAnimationComplete == null ? null : () => _handleItemComplete(index, _generation);
     return switch (item) {
       FlipFlapTextItem(:final text, :final unitType, :final values, :final unitsInPack, :final type) => switch (type) {
-      ItemType.flap => FlapTextUnit(
-        key: Key('FlapTextUnit-$index-${widget.key}'),
-        text: text,
-        values: values,
-        displayType: unitType,
-        unitsInPack: unitsInPack,
-        duration: item.duration ?? widget.unitDuration ?? const Duration(milliseconds: 400),
-        durationJitterMs: _resolveJitter(item.durationJitterMs),
-        unitConstraints: widget.unitConstraints,
-        textStyle: widget.textStyle ?? theme.textStyle,
-        unitDecoration: widget.unitDecoration ?? theme.unitDecoration,
-        useShortestWay: widget.useShortestWay,
-        onAnimationComplete: onComplete,
-      ),
-      ItemType.flip => FlipTextUnit(
-        key: Key('FlipTextUnit-$index-${widget.key}'),
-        text: text,
-        values: values,
-        displayType: unitType,
-        unitsInPack: unitsInPack,
-        duration: item.duration ?? widget.unitDuration ?? const Duration(milliseconds: 800),
-        durationJitterMs: _resolveJitter(item.durationJitterMs),
-        unitConstraints: widget.unitConstraints,
-        textStyle: widget.textStyle ?? theme.textStyle,
-        unitDecoration: widget.unitDecoration ?? theme.unitDecoration,
-        useShortestWay: widget.useShortestWay,
-        flipAxis: item.flipAxis ?? Axis.horizontal,
-        flipDirection: item.flipDirection ?? FlipDirection.forward,
-        onAnimationComplete: onComplete,
-      ),
-    },
-    FlipFlapWidgetItem(:final key, :final child, :final constraints, :final type, :final animationTrigger) =>
-      switch (type) {
-        ItemType.flap => FlapWidgetUnit(
-          key: Key('FlapWidgetUnit-$index-$key'),
-          unitConstraints: constraints ?? widget.unitConstraints,
-          unitDecoration: widget.unitDecoration ?? theme.unitDecoration,
+        ItemType.flap => FlapTextUnit(
+          key: Key('FlapTextUnit-$index-${widget.key}'),
+          text: text,
+          values: values,
+          displayType: unitType,
+          unitsInPack: unitsInPack,
           duration: item.duration ?? widget.unitDuration ?? const Duration(milliseconds: 400),
           durationJitterMs: _resolveJitter(item.durationJitterMs),
-          animationTrigger: animationTrigger,
-          onAnimationComplete: onComplete,
-          child: child,
-        ),
-        ItemType.flip => FlipWidgetUnit(
-          key: Key('FlipWidgetUnit-$index-$key'),
-          unitConstraints: constraints ?? widget.unitConstraints,
+          unitConstraints: widget.unitConstraints,
+          textStyle: widget.textStyle ?? theme.textStyle,
           unitDecoration: widget.unitDecoration ?? theme.unitDecoration,
+          useShortestWay: widget.useShortestWay,
+          onAnimationComplete: onComplete,
+        ),
+        ItemType.flip => FlipTextUnit(
+          key: Key('FlipTextUnit-$index-${widget.key}'),
+          text: text,
+          values: values,
+          displayType: unitType,
+          unitsInPack: unitsInPack,
           duration: item.duration ?? widget.unitDuration ?? const Duration(milliseconds: 800),
           durationJitterMs: _resolveJitter(item.durationJitterMs),
+          unitConstraints: widget.unitConstraints,
+          textStyle: widget.textStyle ?? theme.textStyle,
+          unitDecoration: widget.unitDecoration ?? theme.unitDecoration,
+          useShortestWay: widget.useShortestWay,
           flipAxis: item.flipAxis ?? Axis.horizontal,
           flipDirection: item.flipDirection ?? FlipDirection.forward,
-          animationTrigger: animationTrigger,
           onAnimationComplete: onComplete,
-          child: child,
         ),
       },
+      FlipFlapWidgetItem(:final key, :final child, :final constraints, :final type, :final animationTrigger) =>
+        switch (type) {
+          ItemType.flap => FlapWidgetUnit(
+            key: Key('FlapWidgetUnit-$index-$key'),
+            unitConstraints: constraints ?? widget.unitConstraints,
+            unitDecoration: widget.unitDecoration ?? theme.unitDecoration,
+            duration: item.duration ?? widget.unitDuration ?? const Duration(milliseconds: 400),
+            durationJitterMs: _resolveJitter(item.durationJitterMs),
+            animationTrigger: animationTrigger,
+            onAnimationComplete: onComplete,
+            child: child,
+          ),
+          ItemType.flip => FlipWidgetUnit(
+            key: Key('FlipWidgetUnit-$index-$key'),
+            unitConstraints: constraints ?? widget.unitConstraints,
+            unitDecoration: widget.unitDecoration ?? theme.unitDecoration,
+            duration: item.duration ?? widget.unitDuration ?? const Duration(milliseconds: 800),
+            durationJitterMs: _resolveJitter(item.durationJitterMs),
+            flipAxis: item.flipAxis ?? Axis.horizontal,
+            flipDirection: item.flipDirection ?? FlipDirection.forward,
+            animationTrigger: animationTrigger,
+            onAnimationComplete: onComplete,
+            child: child,
+          ),
+        },
     };
   }
 

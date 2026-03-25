@@ -30,7 +30,8 @@ class FlipWidgetUnit extends FlipUnitBase {
   State<FlipWidgetUnit> createState() => _FlipWidgetUnitState();
 }
 
-class _FlipWidgetUnitState extends State<FlipWidgetUnit> with TickerProviderStateMixin, JitterDurationMixin {
+class _FlipWidgetUnitState extends State<FlipWidgetUnit>
+    with TickerProviderStateMixin, JitterDurationMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -54,7 +55,8 @@ class _FlipWidgetUnitState extends State<FlipWidgetUnit> with TickerProviderStat
     final shouldAnimate = widget.animationTrigger != null
         ? oldWidget.animationTrigger != widget.animationTrigger
         : oldWidget.child.key != widget.child.key ||
-            (oldWidget.child.key == null && !identical(oldWidget.child, widget.child));
+              (oldWidget.child.key == null &&
+                  !identical(oldWidget.child, widget.child));
     if (shouldAnimate) {
       _nextChild = widget.child;
       if (!_controller.isAnimating) {
@@ -73,7 +75,11 @@ class _FlipWidgetUnitState extends State<FlipWidgetUnit> with TickerProviderStat
 
   Animation<double> _buildAnimation() => Tween<double>(begin: 0, end: 1)
       .chain(
-        CurveTween(curve: widget.enableBounce ? BackOutCurve(overshoot: widget.bounceOvershoot) : Curves.easeInOut),
+        CurveTween(
+          curve: widget.enableBounce
+              ? BackOutCurve(overshoot: widget.bounceOvershoot)
+              : Curves.easeInOut,
+        ),
       )
       .animate(_controller);
 
@@ -101,7 +107,8 @@ class _FlipWidgetUnitState extends State<FlipWidgetUnit> with TickerProviderStat
     return Stack(alignment: Alignment.center, children: [back, front]);
   }
 
-  Matrix4 _rotationMatrix(final double angle) => widget.flipAxis == Axis.horizontal
+  Matrix4 _rotationMatrix(final double angle) =>
+      widget.flipAxis == Axis.horizontal
       ? (Matrix4.identity()
           ..setEntry(3, 2, 0.002)
           ..rotateY(angle))
@@ -117,9 +124,13 @@ class _FlipWidgetUnitState extends State<FlipWidgetUnit> with TickerProviderStat
     }
   }
 
-  Duration get _effectiveDuration => effectiveDuration(base: widget.duration, jitterMs: widget.durationJitterMs);
+  Duration get _effectiveDuration => effectiveDuration(
+    base: widget.duration,
+    jitterMs: widget.durationJitterMs,
+  );
 
-  double get _directionSign => widget.flipDirection == FlipDirection.backward ? -1.0 : 1.0;
+  double get _directionSign =>
+      widget.flipDirection == FlipDirection.backward ? -1.0 : 1.0;
 }
 
 class _UnitFace extends StatelessWidget {
@@ -145,7 +156,10 @@ class _UnitFace extends StatelessWidget {
       transform: rotation,
       child: ConstrainedBox(
         constraints: constraints,
-        child: DecoratedBox(decoration: decoration ?? const BoxDecoration(), child: child),
+        child: DecoratedBox(
+          decoration: decoration ?? const BoxDecoration(),
+          child: child,
+        ),
       ),
     ),
   );
