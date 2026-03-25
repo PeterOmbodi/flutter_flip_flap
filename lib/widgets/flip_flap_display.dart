@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_flip_flap/models/flip_flap_item.dart';
 import 'package:flutter_flip_flap/flip_flap_theme.dart';
+import 'package:flutter_flip_flap/models/flip_flap_item.dart';
 import 'package:flutter_flip_flap/widgets/flap/flap_text_unit.dart';
 import 'package:flutter_flip_flap/widgets/flap/flap_widget_unit.dart';
 import 'package:flutter_flip_flap/widgets/flip/flip_text_unit.dart';
@@ -190,8 +190,8 @@ class _FlipFlapDisplayState extends State<FlipFlapDisplay> {
 
   void _refreshPendingIndices(final FlipFlapDisplay oldWidget) {
     final newPending = <int>{};
-    final int commonLength = oldWidget.items.length < widget.items.length ? oldWidget.items.length : widget.items.length;
-    for (int i = 0; i < commonLength; i++) {
+    final commonLength = oldWidget.items.length < widget.items.length ? oldWidget.items.length : widget.items.length;
+    for (var i = 0; i < commonLength; i++) {
       if (_shouldAnimate(oldWidget.items[i], widget.items[i])) {
         newPending.add(i);
       }
